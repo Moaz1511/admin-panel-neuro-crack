@@ -8,7 +8,7 @@ import { CardContent } from "@/components/ui/card"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { tw } from "@/styles/tailwind"
+import { cn } from "@/styles/tailwind"
 import Link from "next/link"
 import { AppConstants } from '@/lib/utils/app-constants'
 
@@ -33,7 +33,7 @@ export default function LoginPage() {
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-3xl">
-        <div className={tw("flex flex-col gap-6")}>
+        <div className={cn("flex flex-col gap-6")}>
           <Card className="overflow-hidden p-0">
             <CardContent className="grid p-0 md:grid-cols-2">
               <LoginFormActions>
