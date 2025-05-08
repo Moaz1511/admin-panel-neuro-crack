@@ -52,9 +52,18 @@ const handleApiError = (error: AxiosError<ApiResponse>) => {
   // Get error message from response
   const message = error.response.data?.message || 'Something went wrong'
   
-  // Don't show toast for login route errors (let component handle it)
-  const isLoginRoute = error.config?.url?.endsWith('/auth/login')
-  if (!isLoginRoute) {
+  // Skip toast for specific routes that handle their own errors
+  const skipToastRoutes = [
+    '/auth/login',
+    '/auth/verify-otp',
+    '/auth/forgot-password',
+    '/auth/update-password'
+  ]
+  
+  const currentUrl = error.config?.url
+  const shouldSkipToast = currentUrl && skipToastRoutes.some(route => currentUrl.endsWith(route))
+  
+  if (!shouldSkipToast) {
     toast.error(message)
   }
 

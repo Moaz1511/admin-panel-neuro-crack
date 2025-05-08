@@ -14,8 +14,9 @@ export const ApiEndpoints = {
     login: `${baseUrl}/auth/login`,
     verifyEmail: `${baseUrl}/auth/verify-email`,
     forgotPassword: `${baseUrl}/auth/forgot-password`,
-    resetPassword: `${baseUrl}/auth/reset-password`,
-    profile: `${baseUrl}/auth/profile`
+    resetPassword: `${baseUrl}/auth/update-password`,
+    profile: `${baseUrl}/auth/profile`,
+    verifyOtp: `${baseUrl}/auth/verify-otp`
   },
   // Add other feature endpoints here as the application grows
   // Example:

@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   /**
-   * Log in a user
+   * Login user
    */
   static async login(data: LoginData): Promise<LoginResponse> {
     try {
@@ -61,7 +61,7 @@ export class AuthService {
   }
 
   /**
-   * Log out the current user
+   * Logout user
    */
   static logout(): void {
     this.removeAccessToken()
@@ -81,7 +81,7 @@ export class AuthService {
   }
 
   /**
-   * Request password reset
+   * Send forgot password email
    */
   static async forgotPassword(email: string): Promise<void> {
     try {
@@ -92,11 +92,11 @@ export class AuthService {
   }
 
   /**
-   * Reset password with token
+   * Reset password
    */
-  static async resetPassword(token: string, password: string): Promise<void> {
+  static async resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
     try {
-      await postRequest<void>(ApiEndpoints.auth.resetPassword, { token, password })
+      await postRequest<void>(ApiEndpoints.auth.resetPassword, { email, otp, newPassword })
     } catch (error) {
       throw error
     }
@@ -176,5 +176,16 @@ export class AuthService {
   private static removeUser(): void {
     if (isServer) return
     localStorage.removeItem(this.USER_KEY)
+  }
+
+  /**
+   * Verify OTP code
+   */
+  static async verifyOtp(email: string, otp: string): Promise<void> {
+    try {
+      await postRequest<void>(ApiEndpoints.auth.verifyOtp, { email, otp })
+    } catch (error) {
+      throw error
+    }
   }
 } 
