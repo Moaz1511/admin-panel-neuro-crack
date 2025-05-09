@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
           {
             key: 'Access-Control-Allow-Origin',
             value: process.env.NODE_ENV === 'development' 
-              ? 'http://192.168.0.102:5000'
+              ? 'http://192.168.0.101:5000'
               : process.env.NEXT_PUBLIC_API_URL || '',
           },
           {
@@ -38,15 +38,15 @@ const nextConfig: NextConfig = {
     'localhost',
     '127.0.0.1',
     // Allow requests from your backend server
-    '192.168.0.102',
+    '192.168.0.101',
     // Allow requests with different protocols and ports
     'http://localhost:3000',
     'http://localhost:5000',
-    'http://192.168.0.102:3000',
-    'http://192.168.0.102:5000',
+    'http://192.168.0.101:3000',
+    'http://192.168.0.101:5000',
     // Allow wildcard subdomains if needed
     '*.localhost',
-    '*.192.168.0.102'
+    '*.192.168.0.101'
   ],
   
   // devIndicators: {
