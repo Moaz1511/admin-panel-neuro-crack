@@ -12,7 +12,7 @@ const quickStats = [
 
 export default function DashboardPage() {
   return (
-    <div>
+    <div className="w-full mx-auto px-4 py-4">
       {/* Quick Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         {quickStats.map((stat, i) => (
