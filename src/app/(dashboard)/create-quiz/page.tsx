@@ -5,10 +5,34 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { FileQuestion, Plus, Search, Trash2 } from 'lucide-react'
+import { FileQuestion, Plus, Search, Trash2, Loader2 } from 'lucide-react'
+import { useAcsQuiz } from '@/lib/hooks/use-acs-quiz'
+import { QuizModule } from '@/lib/services/acs-quiz.service'
+
+type ClassValue = '6' | '7' | '8' | '9' | '10'
 
 export default function CreateQuizPage() {
   const [questions, setQuestions] = useState([{ question: '', options: ['', '', '', ''], correctAnswer: 0 }])
+  const [selectedClass, setSelectedClass] = useState<ClassValue | ''>('')
+  const [selectedCourse, setSelectedCourse] = useState<string>('')
+  const [selectedSubject, setSelectedSubject] = useState<string>('')
+  const [selectedChapter, setSelectedChapter] = useState<string>('')
+  
+  const {
+    courses,
+    subjects,
+    chapters,
+    quizModules,
+    isLoadingCourses,
+    isLoadingSubjects,
+    isLoadingChapters,
+    isLoadingQuizModules,
+    error,
+    fetchCoursesByClass,
+    fetchSubjectsByCourse,
+    fetchChaptersBySubject,
+    fetchQuizModules
+  } = useAcsQuiz()
 
   const addQuestion = () => {
     setQuestions([...questions, { question: '', options: ['', '', '', ''], correctAnswer: 0 }])
@@ -30,6 +54,47 @@ export default function CreateQuizPage() {
     setQuestions(newQuestions)
   }
 
+  const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as ClassValue
+    if (value) {
+      setSelectedClass(value)
+      // Clear dependent selections
+      setSelectedCourse('')
+      setSelectedSubject('')
+      setSelectedChapter('')
+      fetchCoursesByClass(value)
+    }
+  }
+
+  const handleCourseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value
+    if (value) {
+      setSelectedCourse(value)
+      // Clear dependent selections
+      setSelectedSubject('')
+      setSelectedChapter('')
+      fetchSubjectsByCourse(value)
+    }
+  }
+
+  const handleSubjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value
+    if (value) {
+      setSelectedSubject(value)
+      setSelectedChapter('')
+      fetchChaptersBySubject(value)
+    }
+  }
+
+  const handleSearch = async () => {
+    if (selectedChapter) {
+      await fetchQuizModules(selectedChapter)
+    }
+  }
+
+  // Filter quiz modules with tagtype 4
+  const filteredQuizModules = quizModules.filter(module => module.type === 3)
+
   return (
     <div className="w-full mx-auto px-4 py-4">
       <div className="flex items-center gap-4 mb-8">
@@ -44,20 +109,13 @@ export default function CreateQuizPage() {
 
       {/* dropdown selection area */}
       <div className="mb-8 space-y-4">
-     
         <div className="flex flex-wrap gap-3">
+          {/* Class Selection */}
           <div className="relative flex-1">
             <select 
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              defaultValue=""
-              onChange={(e) => {
-                // Update the selected class and enable the course dropdown
-                const selectedClass = e.target.value;
-                if (selectedClass) {
-                  const courseSelect = document.getElementById('course-select') as HTMLSelectElement;
-                  if (courseSelect) courseSelect.disabled = false;
-                }
-              }}
+              value={selectedClass}
+              onChange={handleClassChange}
             >
               <option value="" disabled>Select Class</option>
               <option value="6">Class 6</option>
@@ -68,79 +126,130 @@ export default function CreateQuizPage() {
             </select>
           </div>
           
+          {/* Course Selection */}
           <div className="relative flex-1">
             <select 
               id="course-select"
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              defaultValue=""
-              disabled
-              onChange={(e) => {
-                // Update the selected course and enable the subject dropdown
-                const selectedCourse = e.target.value;
-                if (selectedCourse) {
-                  const subjectSelect = document.getElementById('subject-select') as HTMLSelectElement;
-                  if (subjectSelect) subjectSelect.disabled = false;
-                }
-              }}
+              value={selectedCourse}
+              onChange={handleCourseChange}
+              disabled={!selectedClass}
             >
-              <option value="" disabled>Select Course</option>
-              <option value="science">Science</option>
-              <option value="math">Mathematics</option>
-              <option value="english">English</option>
-              <option value="social">Social Studies</option>
+              <option value="">{isLoadingCourses ? 'Loading courses...' : 'Select Course'}</option>
+              {!isLoadingCourses && courses.map(course => (
+                <option key={course.id} value={course.id}>
+                  {course.name}
+                </option>
+              ))}
             </select>
           </div>
           
+          {/* Subject Selection */}
           <div className="relative flex-1">
             <select 
               id="subject-select"
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              defaultValue=""
-              disabled
-              onChange={(e) => {
-                // Update the selected subject and enable the chapter dropdown
-                const selectedSubject = e.target.value;
-                if (selectedSubject) {
-                  const chapterSelect = document.getElementById('chapter-select') as HTMLSelectElement;
-                  if (chapterSelect) chapterSelect.disabled = false;
-                }
-              }}
+              value={selectedSubject}
+              onChange={handleSubjectChange}
+              disabled={!selectedCourse}
             >
-              <option value="" disabled>Select Subject</option>
-              <option value="physics">Physics</option>
-              <option value="chemistry">Chemistry</option>
-              <option value="biology">Biology</option>
+              <option value="">{isLoadingSubjects ? 'Loading subjects...' : 'Select Subject'}</option>
+              {!isLoadingSubjects && subjects.map(subject => (
+                <option key={subject.id} value={subject.id}>
+                  {subject.name}
+                </option>
+              ))}
             </select>
           </div>
           
+          {/* Chapter Selection */}
           <div className="relative flex-1">
             <select 
               id="chapter-select"
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              defaultValue=""
-              disabled
+              value={selectedChapter}
+              onChange={(e) => setSelectedChapter(e.target.value)}
+              disabled={!selectedSubject}
             >
-              <option value="" disabled>Select Chapter</option>
-              <option value="chapter1">Chapter 1</option>
-              <option value="chapter2">Chapter 2</option>
-              <option value="chapter3">Chapter 3</option>
+              <option value="">{isLoadingChapters ? 'Loading chapters...' : 'Select Chapter'}</option>
+              {!isLoadingChapters && chapters.map(chapter => (
+                <option key={chapter.id} value={chapter.id}>
+                  {chapter.name}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="relative flex-1">
             <Button 
-              className="h-10 w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white"
+              className={`h-10 w-full ${!selectedChapter ? 'bg-gray-400' : 'bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600'} text-white`}
+              onClick={handleSearch}
+              disabled={!selectedChapter || isLoadingQuizModules}
             >
-              <Search className="h-4 w-4 mr-2" />
-              Search Quiz
+              {isLoadingQuizModules ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Searching quiz...
+                </>
+              ) : (
+                <>
+                  <Search className="h-4 w-4 mr-2" />
+                  Search Quiz
+                </>
+              )}
             </Button>
           </div>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+            {error}
+          </div>
+        )}
+
+        {/* Quiz Modules Table */}
+        {filteredQuizModules.length > 0 ? (
+          <div className="mt-8">
+            <div className="rounded-md border">
+              <table className="w-full">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="py-3 px-4 text-left font-medium">Serial No</th>
+                    <th className="py-3 px-4 text-left font-medium">Quiz Title</th>
+                    <th className="py-3 px-4 text-left font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredQuizModules.map((module, index) => (
+                    <tr key={module.id} className="border-t">
+                      <td className="py-3 px-4">{index + 1}</td>
+                      <td className="py-3 px-4">{module.name}</td>
+                      <td className="py-3 px-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center gap-2"
+                          onClick={() => {/* TODO: Handle add questions */}}
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Questions
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-8 py-12 flex items-center justify-center">
+            <div className="text-center p-6 rounded-lg bg-muted/30">
+              <p className="text-lg font-medium text-muted-foreground">No active quiz found!</p>
+            </div>
+          </div>
+        )}
       </div>
-      
-{/* add sections */}
-    
-      
     </div>
   )
 } 
