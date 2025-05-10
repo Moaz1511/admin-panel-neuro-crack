@@ -1,9 +1,10 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, FileQuestion, RefreshCw } from "lucide-react";
+import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, FileQuestion, RefreshCw, Eye } from "lucide-react";
 import { toast } from 'sonner';
 import { useDocsToExcel } from '@/lib/hooks/use-docs-to-excel';
+import * as XLSX from 'xlsx';
 
 const showErrorToast = (message: string) => {
     toast(message, {
@@ -18,6 +19,8 @@ const showErrorToast = (message: string) => {
 export default function DocsToExcelPage() {
   const [file, setFile] = useState<File | null>(null);
   const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [sheetData, setSheetData] = useState<any[][] | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
@@ -140,6 +143,18 @@ export default function DocsToExcelPage() {
     }
   };
 
+  const handleViewSheet = async () => {
+    if (!excelBlob) return;
+    setShowPreview(true);
+    // Read the blob as ArrayBuffer and parse with XLSX
+    const arrayBuffer = await excelBlob.arrayBuffer();
+    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+    const firstSheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[firstSheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    setSheetData(data as any[][]);
+  };
+
   const handleDownload = () => {
     if (!excelBlob) return;
     const url = window.URL.createObjectURL(excelBlob);
@@ -251,11 +266,67 @@ export default function DocsToExcelPage() {
               <Download className="h-5 w-5" />
               Download XLS
             </Button>
+            <Button
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700"
+              onClick={handleViewSheet}
+              disabled={!excelBlob}
+            >
+              <Eye className="h-5 w-5" />
+              View Sheet
+            </Button>
           </div>
-          <div className="mt-6 text-xs text-gray-400 text-center">
-            <p>Only <span className="font-semibold text-blue-600">.doc</span> and <span className="font-semibold text-blue-600">.docx</span> files are allowed. Max file size: 10MB.</p>
-            <p className="mt-1">Your files are processed securely and never stored.</p>
-          </div>
+          {showPreview && sheetData && (
+            <div className="mt-8 overflow-x-auto border rounded-lg bg-white shadow">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr>
+                    {sheetData[0]?.map((cell, idx) => (
+                      <th
+                        key={idx}
+                        className={
+                          idx === 2
+                            ? "px-4 py-2 bg-gray-100 font-bold border-b border-gray-200 text-left min-w-[12rem] max-w-2xl"
+                            : "px-4 py-2 bg-gray-100 font-bold border-b border-gray-200 text-left w-48 max-w-xs truncate"
+                        }
+                        style={
+                          idx === 2
+                            ? { minWidth: '12rem', maxWidth: '40rem', whiteSpace: 'normal' }
+                            : { width: '12rem', maxWidth: '16rem' }
+                        }
+                      >
+                        {cell}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sheetData.slice(1).map((row, rowIdx) => (
+                    <tr key={rowIdx}>
+                      {row.map((cell, colIdx) => (
+                        <td
+                          key={colIdx}
+                          className={
+                            colIdx === 2
+                              ? "px-4 py-2 border-b border-gray-100 min-w-[12rem] max-w-2xl whitespace-normal"
+                              : "px-4 py-2 border-b border-gray-100 w-48 max-w-xs truncate"
+                          }
+                          style={
+                            colIdx === 2
+                              ? { minWidth: '12rem', maxWidth: '40rem', whiteSpace: 'normal', wordBreak: 'break-word' }
+                              : { width: '12rem', maxWidth: '16rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+                          }
+                          title={colIdx === 2 ? undefined : (typeof cell === 'string' ? cell : String(cell))}
+                        >
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          
         </div>
       )}
     </div>
