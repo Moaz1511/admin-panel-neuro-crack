@@ -2,14 +2,11 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-import { FileQuestion, Plus, Search, Trash2, Loader2 } from 'lucide-react'
+import { FileQuestion, Plus, Search, Loader2, Pencil, Check, Trash2, FilePenLine } from 'lucide-react'
 import { useAcsQuiz } from '@/lib/hooks/use-acs-quiz'
-import { QuizModule } from '@/lib/services/acs-quiz.service'
 import React from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { useRouter } from 'next/navigation'
 
 type ClassValue = '6' | '7' | '8' | '9' | '10'
 
@@ -36,6 +33,8 @@ export default function CreateQuizPage() {
     fetchChaptersBySubject,
     fetchQuizModules
   } = useAcsQuiz()
+
+  const router = useRouter();
 
   const addQuestion = () => {
     setQuestions([...questions, { question: '', options: ['', '', '', ''], correctAnswer: 0 }])
@@ -233,15 +232,36 @@ export default function CreateQuizPage() {
                         <td className="py-3 px-4">{index + 1}</td>
                         <td className="py-3 px-4">{module.name}</td>
                         <td className="py-3 px-4">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-2"
-                            onClick={() => {/* TODO: Handle add questions */}}
-                          >
-                            <Plus className="h-4 w-4" />
-                            Add Questions
-                          </Button>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              className="flex items-center gap-2 px-3 py-2 rounded-md bg-green-50 hover:bg-green-100"
+                              title="Add quiz questions"
+                              onClick={() => router.push(`/create-quiz/${module.id}`)}
+                            >
+                              <Plus className="h-4 w-4 text-green-600" />
+                              <span className="text-green-600 text-sm font-medium">Add Question</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              className="flex items-center gap-2 px-3 py-2 rounded-md bg-blue-50 hover:bg-blue-100"
+                              title="Update quiz questions"
+                              onClick={() => {/* TODO: Handle update */}}
+                            >
+                              <FilePenLine className="h-4 w-4 text-blue-600"/>
+                              
+                              <span className="text-blue-600 text-sm font-medium">Update</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              className="flex items-center gap-2 px-3 py-2 rounded-md bg-red-50 hover:bg-red-100"
+                              title="Delete quiz questions"
+                              onClick={() => {/* TODO: Handle delete */}}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                              <span className="text-red-600 text-sm font-medium">Delete</span>
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
