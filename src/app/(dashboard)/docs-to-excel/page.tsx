@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, FileQuestion, RefreshCw, Eye, CircleMinus } from "lucide-react";
+import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, FileQuestion, RefreshCw, Eye, CircleMinus, Database, Edit } from "lucide-react";
 import { toast } from 'sonner';
 import { useDocsToExcel } from '@/lib/hooks/use-docs-to-excel';
 import * as XLSX from 'xlsx';
@@ -249,7 +249,7 @@ export default function DocsToExcelPage() {
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-blue-500" />
                 <span className="text-sm text-gray-700 font-medium">{file.name}</span>
-                <span className="text-xs text-gray-500">({(file.size / 1024).toFixed(2)} KB)</span>
+                <span className="text-xs text-gray-500">({(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
               </div>
               <Button
                 className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-400 text-white font-medium shadow-sm hover:from-blue-700 hover:to-blue-500"
@@ -272,14 +272,14 @@ export default function DocsToExcelPage() {
               <p className="text-xs text-blue-500 mt-1">Uploading... {uploadProgress}%</p>
             </div>
           )}
-          <div className="flex gap-4 mt-4 w-full justify-center">
+          <div className="flex gap-4 mt-4 w-full mx-auto justify-end">
             <Button
               className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold shadow-md hover:bg-green-700"
               onClick={handleDownload}
               disabled={!excelBlob}
             >
               <Download className="h-5 w-5" />
-              Download XLS
+              Download XLSX
             </Button>
             <Button
               className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700"
@@ -289,6 +289,23 @@ export default function DocsToExcelPage() {
               <Eye className="h-5 w-5" />
               View Sheet
             </Button>
+            <Button
+              className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white font-semibold shadow-md hover:bg-purple-700"
+            //   onClick={handleEditSheet}
+              disabled={!excelBlob}
+            >
+              <Edit className="h-5 w-5" />
+              Edit Sheet
+            </Button>
+            <Button
+              className="flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-semibold shadow-md hover:bg-amber-700"
+            //   onClick={handleUploadToDatabase}
+              disabled={!excelBlob}
+            >
+              <Database className="h-5 w-5" />
+              Upload to Database
+            </Button>
+
           </div>
           {showPreview && sheetData && (
             <div className="mt-8 overflow-x-auto border rounded-lg bg-white shadow">
