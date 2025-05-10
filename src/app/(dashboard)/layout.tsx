@@ -19,6 +19,7 @@ import {
   Settings,
   LogOut,
   Brain,
+  FileSpreadsheet,
 } from 'lucide-react'
 
 // Import UI components
@@ -35,6 +36,7 @@ const navigationItems = [
   { name: 'Upload Quiz', icon: Upload, href: '/upload-quiz' },
   { name: 'Teacher Profile', icon: UserCircle, href: '/profile' },
   { name: 'Settings', icon: Settings, href: '/settings' },
+  { name: 'Docs to Excel', icon: FileSpreadsheet, href: '/docs-to-excel' },
 ]
 
 // Types
