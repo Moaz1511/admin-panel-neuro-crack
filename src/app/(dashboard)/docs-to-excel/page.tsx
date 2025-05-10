@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, FileQuestion, RefreshCw, Eye } from "lucide-react";
+import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, FileQuestion, RefreshCw, Eye, CircleMinus } from "lucide-react";
 import { toast } from 'sonner';
 import { useDocsToExcel } from '@/lib/hooks/use-docs-to-excel';
 import * as XLSX from 'xlsx';
@@ -79,6 +79,11 @@ export default function DocsToExcelPage() {
       inputRef.current.value = "";
       inputRef.current.click();
     }
+  };
+
+  const handleResetFile = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    clearFile();
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -228,6 +233,16 @@ export default function DocsToExcelPage() {
               >
                 <RefreshCw className="h-4 w-4" />
                 Change File
+              </Button>
+
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 px-4 py-3 text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100"
+                onClick={handleResetFile}
+                disabled={isLoading}
+              >
+                <CircleMinus className="h-4 w-4" />
+                Reset File
               </Button>
             </div>
             <div className="flex items-center justify-between bg-gray-50 p-3 rounded-md border border-gray-200">
