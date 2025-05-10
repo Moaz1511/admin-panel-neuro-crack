@@ -31,6 +31,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  
 
   // Configure allowed origins for development mode
   allowedDevOrigins: [
@@ -39,14 +40,18 @@ const nextConfig: NextConfig = {
     '127.0.0.1',
     // Allow requests from your backend server
     '192.168.0.101',
+    '192.168.154.33', 
     // Allow requests with different protocols and ports
     'http://localhost:3000',
     'http://localhost:5000',
     'http://192.168.0.101:3000',
     'http://192.168.0.101:5000',
+    'http://192.168.154.33:3000',
+    'http://192.168.154.33:5000',
     // Allow wildcard subdomains if needed
     '*.localhost',
-    '*.192.168.0.101'
+    '*.192.168.0.101',
+    '*.192.168.154.33'
   ],
   
   // devIndicators: {

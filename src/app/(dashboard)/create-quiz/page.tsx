@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator'
 import { FileQuestion, Plus, Search, Trash2, Loader2 } from 'lucide-react'
 import { useAcsQuiz } from '@/lib/hooks/use-acs-quiz'
 import { QuizModule } from '@/lib/services/acs-quiz.service'
+import React from 'react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 type ClassValue = '6' | '7' | '8' | '9' | '10'
 
@@ -17,6 +19,7 @@ export default function CreateQuizPage() {
   const [selectedCourse, setSelectedCourse] = useState<string>('')
   const [selectedSubject, setSelectedSubject] = useState<string>('')
   const [selectedChapter, setSelectedChapter] = useState<string>('')
+  const [hasSearched, setHasSearched] = useState(false)
   
   const {
     courses,
@@ -58,10 +61,11 @@ export default function CreateQuizPage() {
     const value = e.target.value as ClassValue
     if (value) {
       setSelectedClass(value)
-      // Clear dependent selections
+      // Clear dependent selections and search state
       setSelectedCourse('')
       setSelectedSubject('')
       setSelectedChapter('')
+      setHasSearched(false)
       fetchCoursesByClass(value)
     }
   }
@@ -70,9 +74,10 @@ export default function CreateQuizPage() {
     const value = e.target.value
     if (value) {
       setSelectedCourse(value)
-      // Clear dependent selections
+      // Clear dependent selections and search state
       setSelectedSubject('')
       setSelectedChapter('')
+      setHasSearched(false)
       fetchSubjectsByCourse(value)
     }
   }
@@ -82,17 +87,25 @@ export default function CreateQuizPage() {
     if (value) {
       setSelectedSubject(value)
       setSelectedChapter('')
+      setHasSearched(false)
       fetchChaptersBySubject(value)
     }
+  }
+
+  const handleChapterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value
+    setSelectedChapter(value)
+    setHasSearched(false)
   }
 
   const handleSearch = async () => {
     if (selectedChapter) {
       await fetchQuizModules(selectedChapter)
+      setHasSearched(true)
     }
   }
 
-  // Filter quiz modules with tagtype 4
+  // Filter quiz modules with type 3
   const filteredQuizModules = quizModules.filter(module => module.type === 3)
 
   return (
@@ -168,7 +181,7 @@ export default function CreateQuizPage() {
               id="chapter-select"
               className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={selectedChapter}
-              onChange={(e) => setSelectedChapter(e.target.value)}
+              onChange={handleChapterChange}
               disabled={!selectedSubject}
             >
               <option value="">{isLoadingChapters ? 'Loading chapters...' : 'Select Chapter'}</option>
@@ -201,53 +214,53 @@ export default function CreateQuizPage() {
           </div>
         </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
-            {error}
-          </div>
-        )}
-
-        {/* Quiz Modules Table */}
-        {filteredQuizModules.length > 0 ? (
-          <div className="mt-8">
-            <div className="rounded-md border">
-              <table className="w-full">
-                <thead className="bg-muted/50">
-                  <tr>
-                    <th className="py-3 px-4 text-left font-medium">Serial No</th>
-                    <th className="py-3 px-4 text-left font-medium">Quiz Title</th>
-                    <th className="py-3 px-4 text-left font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredQuizModules.map((module, index) => (
-                    <tr key={module.id} className="border-t">
-                      <td className="py-3 px-4">{index + 1}</td>
-                      <td className="py-3 px-4">{module.name}</td>
-                      <td className="py-3 px-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center gap-2"
-                          onClick={() => {/* TODO: Handle add questions */}}
-                        >
-                          <Plus className="h-4 w-4" />
-                          Add Questions
-                        </Button>
-                      </td>
+        {/* Quiz Modules Table - Only show after search */}
+        {hasSearched && (
+          filteredQuizModules.length > 0 ? (
+            <div className="mt-8">
+              <div className="rounded-md border">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="py-3 px-4 text-left font-medium">Serial No</th>
+                      <th className="py-3 px-4 text-left font-medium">Quiz Title</th>
+                      <th className="py-3 px-4 text-left font-medium">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredQuizModules.map((module, index) => (
+                      <tr key={module.id} className="border-t">
+                        <td className="py-3 px-4">{index + 1}</td>
+                        <td className="py-3 px-4">{module.name}</td>
+                        <td className="py-3 px-4">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex items-center gap-2"
+                            onClick={() => {/* TODO: Handle add questions */}}
+                          >
+                            <Plus className="h-4 w-4" />
+                            Add Questions
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="mt-8 py-12 flex items-center justify-center">
-            <div className="text-center p-6 rounded-lg bg-muted/30">
-              <p className="text-lg font-medium text-muted-foreground">No active quiz found!</p>
+          ) : (
+            <div className="mt-8 py-12 flex flex-col items-center justify-center">
+              <div className="w-64 h-64">
+                <DotLottieReact
+                  src="https://lottie.host/020000e5-1292-4f75-8ce9-66798f9fbe31/2wCk2ssV9m.lottie"
+                  loop
+                  autoplay
+                />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground mt-4">No active quiz found!</p>
             </div>
-          </div>
+          )
         )}
       </div>
     </div>

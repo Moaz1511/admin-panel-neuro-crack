@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react'
 import { AcsQuizService, Course, Subject, Chapter, QuizModule } from '../services/acs-quiz.service'
 import { AppConstants } from '../utils/app-constants'
+import { toast } from 'sonner'
+import React from 'react'
 
 // Define valid class values
 type ClassValue = '6' | '7' | '8' | '9' | '10'
@@ -32,6 +34,16 @@ export function useAcsQuiz(): UseAcsQuizReturn {
   const [isLoadingQuizModules, setIsLoadingQuizModules] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const showErrorToast = (message: string) => {
+    toast(message, {
+      icon: React.createElement(require("lucide-react").CircleAlert, {
+        className: "text-red-500",
+        size: 20
+      }),
+      style: { color: 'black' }
+    })
+  }
+
   const fetchCoursesByClass = useCallback(async (classValue: ClassValue) => {
     setIsLoadingCourses(true)
     setError(null)
@@ -42,7 +54,8 @@ export function useAcsQuiz(): UseAcsQuizReturn {
       const coursesData = await AcsQuizService.getCoursesByClass(classId)
       setCourses(coursesData)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch courses')
+    //   setError(err instanceof Error ? err.message : 'Failed to fetch courses')
+      showErrorToast('Something went wrong!')
     } finally {
       setIsLoadingCourses(false)
     }
@@ -55,7 +68,9 @@ export function useAcsQuiz(): UseAcsQuizReturn {
       const subjectsData = await AcsQuizService.getSubjectsByCourse(courseId)
       setSubjects(subjectsData)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch subjects')
+    //   const errorMessage = err instanceof Error ? err.message : 'Failed to fetch subjects'
+    //   setError(errorMessage)
+      showErrorToast('Something went wrong!')
     } finally {
       setIsLoadingSubjects(false)
     }
@@ -68,7 +83,9 @@ export function useAcsQuiz(): UseAcsQuizReturn {
       const chaptersData = await AcsQuizService.getChaptersBySubject(subjectId)
       setChapters(chaptersData)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch chapters')
+    //   const errorMessage = err instanceof Error ? err.message : 'Failed to fetch chapters'
+    //   setError(errorMessage)
+      showErrorToast('Something went wrong!')
     } finally {
       setIsLoadingChapters(false)
     }
@@ -81,7 +98,9 @@ export function useAcsQuiz(): UseAcsQuizReturn {
       const modulesData = await AcsQuizService.getQuizModules(chapterId)
       setQuizModules(modulesData)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch quiz modules')
+    //   const errorMessage = err instanceof Error ? err.message : 'Failed to fetch quiz modules'
+    //   setError(errorMessage)
+      showErrorToast('Something went wrong!')
     } finally {
       setIsLoadingQuizModules(false)
     }
