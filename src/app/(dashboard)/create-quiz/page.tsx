@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { FileQuestion, Plus, Search, Loader2, Pencil, Check, Trash2, FilePenLine } from 'lucide-react'
+import { FileQuestion, Plus, Search, Loader2, Trash2, FilePenLine } from 'lucide-react'
 import { useAcsQuiz } from '@/lib/hooks/use-acs-quiz'
 import React from 'react';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -11,7 +11,6 @@ import { useRouter } from 'next/navigation'
 type ClassValue = '6' | '7' | '8' | '9' | '10'
 
 export default function CreateQuizPage() {
-  const [questions, setQuestions] = useState([{ question: '', options: ['', '', '', ''], correctAnswer: 0 }])
   const [selectedClass, setSelectedClass] = useState<ClassValue | ''>('')
   const [selectedCourse, setSelectedCourse] = useState<string>('')
   const [selectedSubject, setSelectedSubject] = useState<string>('')
@@ -27,7 +26,6 @@ export default function CreateQuizPage() {
     isLoadingSubjects,
     isLoadingChapters,
     isLoadingQuizModules,
-    error,
     fetchCoursesByClass,
     fetchSubjectsByCourse,
     fetchChaptersBySubject,
@@ -36,25 +34,6 @@ export default function CreateQuizPage() {
 
   const router = useRouter();
 
-  const addQuestion = () => {
-    setQuestions([...questions, { question: '', options: ['', '', '', ''], correctAnswer: 0 }])
-  }
-
-  const removeQuestion = (index: number) => {
-    setQuestions(questions.filter((_, i) => i !== index))
-  }
-
-  const updateQuestion = (index: number, field: string, value: string | number) => {
-    const newQuestions = [...questions]
-    newQuestions[index] = { ...newQuestions[index], [field]: value }
-    setQuestions(newQuestions)
-  }
-
-  const updateOption = (questionIndex: number, optionIndex: number, value: string) => {
-    const newQuestions = [...questions]
-    newQuestions[questionIndex].options[optionIndex] = value
-    setQuestions(newQuestions)
-  }
 
   const handleClassChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value as ClassValue

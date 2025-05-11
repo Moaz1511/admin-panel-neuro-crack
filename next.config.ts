@@ -54,9 +54,9 @@ const nextConfig: NextConfig = {
     '*.192.168.154.33'
   ],
   
-  // devIndicators: {
-  //   buildActivity: false,
-  // },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;

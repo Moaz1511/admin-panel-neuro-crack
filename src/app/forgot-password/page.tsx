@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
             Forgot Password
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your email address and we'll send you an OTP code to reset your password
+            Enter your email address and we will send you an OTP code to reset your password
           </CardDescription>
         </CardHeader>
         <CardContent>

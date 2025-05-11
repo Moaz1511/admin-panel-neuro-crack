@@ -7,7 +7,6 @@ import type {
   RegisterResponse,
   User,
 } from "@/lib/types/auth-types"
-import { redirect } from "next/navigation"
 
 const isServer = typeof window === 'undefined'
 

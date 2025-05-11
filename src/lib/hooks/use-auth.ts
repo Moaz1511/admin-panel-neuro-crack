@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { AuthService } from "@/lib/services/auth-service"
 import type {
   AuthState,

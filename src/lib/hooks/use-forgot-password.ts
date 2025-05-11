@@ -19,7 +19,7 @@ export function useForgotPassword() {
       setEmail(data.email)
       toast.success("OTP sent to your email")
       router.push("/verify-otp")
-    } catch (error) {
+    } catch (err) {
       toast.error("Something went wrong")
     } finally {
       setIsLoading(false)

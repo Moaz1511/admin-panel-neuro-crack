@@ -3,6 +3,7 @@ import { AcsQuizService, Course, Subject, Chapter, QuizModule } from '../service
 import { AppConstants } from '../utils/app-constants'
 import { toast } from 'sonner'
 import React from 'react'
+import { CircleAlert } from 'lucide-react'
 
 // Define valid class values
 type ClassValue = '6' | '7' | '8' | '9' | '10'
@@ -36,7 +37,7 @@ export function useAcsQuiz(): UseAcsQuizReturn {
 
   const showErrorToast = (message: string) => {
     toast(message, {
-      icon: React.createElement(require("lucide-react").CircleAlert, {
+      icon: React.createElement(CircleAlert, {
         className: "text-red-500",
         size: 20
       }),

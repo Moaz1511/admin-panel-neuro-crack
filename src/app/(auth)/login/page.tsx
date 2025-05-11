@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/styles/tailwind"
 import Link from "next/link"
 import { AppConstants } from '@/lib/utils/app-constants'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -79,7 +80,7 @@ export default function LoginPage() {
                 </div>
               </LoginFormActions>
               <div className="bg-muted relative hidden md:block">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1602671737358-be33c742dd86?q=80&w=1200&auto=format&fit=crop"
                   alt="Login background - workspace with laptop and coffee"
                   className="absolute inset-0 h-full w-full object-cover object-center dark:brightness-[0.2] dark:grayscale"
