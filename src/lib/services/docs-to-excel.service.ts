@@ -1,13 +1,13 @@
 import axios from 'axios';
+import { ApiEndpoints } from '../api/api-endpoints';
 
-const API_URL = 'http://127.0.0.1:8000/upload-docx';
 
 export class DocsToExcelService {
   static async convertDocToExcel(file: File): Promise<Blob> {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await axios.post(API_URL, formData, {
+      const response = await axios.post(ApiEndpoints.ai.uploadDocx, formData, {
         responseType: 'blob',
         headers: {
           'Content-Type': 'multipart/form-data',
