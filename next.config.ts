@@ -41,6 +41,7 @@ const nextConfig: NextConfig = {
     // Allow requests from your backend server
     '192.168.0.101',
     '192.168.154.33', 
+    'http://ai.neurocrack.com',
     // Allow requests with different protocols and ports
     'http://localhost:3000',
     'http://localhost:5000',

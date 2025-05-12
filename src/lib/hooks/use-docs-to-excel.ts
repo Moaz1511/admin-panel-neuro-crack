@@ -5,15 +5,14 @@ export function useDocsToExcel() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const convertDocToExcel = async (file: File): Promise<Blob | null> => {
+  const convertDocToExcel = async (file: File): Promise<{ blob: Blob | null, filename: string }> => {
     setIsLoading(true);
     setError(null);
     try {
-      const blob = await DocsToExcelService.convertDocToExcel(file);
-      return blob;
+      return await DocsToExcelService.convertDocToExcel(file);
     } catch (err: any) {
       setError(err?.message || 'Failed to convert file');
-      return null;
+      return { blob: null, filename: 'output.xlsx' };
     } finally {
       setIsLoading(false);
     }
