@@ -28,6 +28,8 @@ export default function DocsToExcelPage() {
   const inputRef = useRef<HTMLInputElement>(null);
   const { convertDocToExcel, isLoading } = useDocsToExcel();
 
+  const [excelFilename, setExcelFilename] = useState<string>('output.xlsx');
+
   // Always clear file input and state before new upload
   const clearFile = () => {
     setFile(null);
@@ -131,10 +133,12 @@ export default function DocsToExcelPage() {
       return;
     }
     setExcelBlob(null);
+    setExcelFilename('output.xlsx');
     try {
-      const blob = await convertDocToExcel(file);
+      const { blob, filename } = await convertDocToExcel(file);
       if (blob) {
         setExcelBlob(blob);
+        setExcelFilename(filename);
         toast.success('Conversion successful! You can now download your Excel file.');
       } else {
         showErrorToast('Failed to convert file.');
@@ -161,7 +165,7 @@ export default function DocsToExcelPage() {
     const url = window.URL.createObjectURL(excelBlob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = (file?.name?.replace(/\.(doc|docx)$/i, '') || 'converted') + '.xlsx';
+    a.download = excelFilename;
     document.body.appendChild(a);
     a.click();
     setTimeout(() => {
@@ -269,39 +273,42 @@ export default function DocsToExcelPage() {
             </div>
           )}
           <div className="flex gap-4 mt-4 w-full mx-auto justify-end">
-            <Button
-              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold shadow-md hover:bg-green-700"
-              onClick={handleDownload}
-              disabled={!excelBlob}
-            >
-              <Download className="h-5 w-5" />
-              Download XLSX
-            </Button>
-            <Button
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700"
-              onClick={handleViewSheet}
-              disabled={!excelBlob}
-            >
-              <Eye className="h-5 w-5" />
-              View Sheet
-            </Button>
-            <Button
-              className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white font-semibold shadow-md hover:bg-purple-700"
-            //   onClick={handleEditSheet}
-              disabled={!excelBlob}
-            >
-              <Edit className="h-5 w-5" />
-              Edit Sheet
-            </Button>
-            <Button
-              className="flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-semibold shadow-md hover:bg-amber-700"
-            //   onClick={handleUploadToDatabase}
-              disabled={!excelBlob}
-            >
-              <Database className="h-5 w-5" />
-              Upload to Database
-            </Button>
-
+            {excelBlob && (
+              <>
+                <Button
+                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold shadow-md hover:bg-green-700"
+                  onClick={handleDownload}
+                  disabled={!excelBlob}
+                >
+                  <Download className="h-5 w-5" />
+                  Download XLSX
+                </Button>
+                <Button
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold shadow-md hover:bg-blue-700"
+                  onClick={handleViewSheet}
+                  disabled={!excelBlob}
+                >
+                  <Eye className="h-5 w-5" />
+                  View Sheet
+                </Button>
+                <Button
+                  className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white font-semibold shadow-md hover:bg-purple-700"
+                  onClick={() => {}}
+                  disabled={!excelBlob}
+                >
+                  <Edit className="h-5 w-5" />
+                  Edit Sheet
+                </Button>
+                <Button
+                  className="flex items-center gap-2 px-6 py-3 bg-amber-600 text-white font-semibold shadow-md hover:bg-amber-700"
+                  onClick={() => {}}
+                  disabled={!excelBlob}
+                >
+                  <Database className="h-5 w-5" />
+                  Upload to Database
+                </Button>
+              </>
+            )}
           </div>
           {showPreview && sheetData && (
             <div className="mt-8 overflow-x-auto border rounded-lg bg-white shadow">
