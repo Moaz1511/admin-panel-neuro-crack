@@ -5,9 +5,9 @@
  */
 
 // Remove trailing slash from base URL
-export const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://192.168.0.101:5000").replace(/\/$/, '')
-export const acsQuizBaseUrl = process.env.NEXT_PUBLIC_ACS_QUIZ_URL || "http://192.168.0.101:2090/api/modules/partner"
-export const aiBaseUrl = process.env.NEXT_PUBLIC_AI_URL || "http://192.168.0.101:8000"
+export const baseUrl = process.env.NEXT_PUBLIC_API_URL
+export const acsQuizBaseUrl = process.env.NEXT_PUBLIC_ACS_QUIZ_URL
+export const aiBaseUrl = process.env.NEXT_PUBLIC_AI_URL
 
 export const ApiEndpoints = {
   auth: {

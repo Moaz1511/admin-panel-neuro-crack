@@ -1,7 +1,7 @@
 export const AppConstants = {
   // API related constants
   api: {
-    baseUrl: (process.env.NEXT_PUBLIC_API_URL || 'http://192.168.0.101:5000').replace(/\/$/, ''),
+    baseUrl: process.env.NEXT_PUBLIC_API_URL,
     timeout: 30000, // 30 seconds
   },
 
