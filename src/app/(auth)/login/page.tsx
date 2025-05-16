@@ -83,6 +83,8 @@ export default function LoginPage() {
                 <Image
                   src="https://images.unsplash.com/photo-1602671737358-be33c742dd86?q=80&w=1200&auto=format&fit=crop"
                   alt="Login background - workspace with laptop and coffee"
+                  width={1200}
+                  height={800}
                   className="absolute inset-0 h-full w-full object-cover object-center dark:brightness-[0.2] dark:grayscale"
                 />
               </div>

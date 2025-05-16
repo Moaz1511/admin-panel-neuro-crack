@@ -8,8 +8,9 @@ export const AppConstants = {
   routes: {
     home: '/',
     login: '/login',
-    register: '/register',
+    signup: '/signup',
     dashboard: '/dashboard',
+    
   },
 
   subjectIds: {

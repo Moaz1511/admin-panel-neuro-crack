@@ -7,6 +7,12 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 const nextConfig: NextConfig = {
+  images: {
+    domains: [
+      'images.unsplash.com',
+      'illustrations.popsy.co'
+    ],
+  },
   /* config options here */
   // Allow cross-origin requests only for specific origins from .env
   async headers() {
