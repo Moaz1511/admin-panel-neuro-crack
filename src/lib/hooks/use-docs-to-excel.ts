@@ -11,8 +11,8 @@ export function useDocsToExcel() {
     try {
       const blob = await DocsToExcelService.convertDocToExcel(file);
       return blob;
-    } catch (err: any) {
-      setError(err?.message || 'Failed to convert file');
+    } catch (err: unknown) {
+      setError((err as Error)?.message || 'Failed to convert file');
       return null;
     } finally {
       setIsLoading(false);

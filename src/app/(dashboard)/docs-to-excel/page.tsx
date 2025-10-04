@@ -1,17 +1,14 @@
 "use client";
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, FileQuestion, RefreshCw, Eye, CircleMinus, Database, Edit } from "lucide-react";
+import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, RefreshCw, Eye, CircleMinus, Database, Edit, CircleAlert } from "lucide-react";
 import { toast } from 'sonner';
 import { useDocsToExcel } from '@/lib/hooks/use-docs-to-excel';
 import * as XLSX from 'xlsx';
 
 const showErrorToast = (message: string) => {
     toast(message, {
-      icon: React.createElement(require("lucide-react").CircleAlert, {
-        className: "text-red-500",
-        size: 20
-      }),
+      icon: <CircleAlert className="text-red-500" size={20} />,
       style: { color: 'black' }
     })
   }
@@ -20,13 +17,12 @@ export default function DocsToExcelPage() {
   const [file, setFile] = useState<File | null>(null);
   const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [sheetData, setSheetData] = useState<any[][] | null>(null);
+  const [sheetData, setSheetData] = useState<string[][] | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState("");
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { convertDocToExcel, isLoading, error: convertError } = useDocsToExcel();
+  const { convertDocToExcel, isLoading } = useDocsToExcel();
 
   // Always clear file input and state before new upload
   const clearFile = () => {
@@ -34,12 +30,10 @@ export default function DocsToExcelPage() {
     setExcelBlob(null);
     setUploadProgress(0);
     setIsUploading(false);
-    setError("");
     if (inputRef.current) inputRef.current.value = "";
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError("");
     const selected = e.target.files?.[0];
     if (selected) {
       if (!selected.name.match(/\.(doc|docx)$/i)) {
@@ -102,7 +96,6 @@ export default function DocsToExcelPage() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    setError("");
     const dropped = e.dataTransfer.files?.[0];
     if (dropped) {
       if (!dropped.name.match(/\.(doc|docx)$/i)) {
@@ -129,7 +122,6 @@ export default function DocsToExcelPage() {
   };
 
   const handleConvert = async () => {
-    setError("");
     if (!file) {
       showErrorToast("Please upload a .doc or .docx file first.");
       return;
@@ -143,8 +135,8 @@ export default function DocsToExcelPage() {
       } else {
         showErrorToast('Failed to convert file.');
       }
-    } catch (err: any) {
-      showErrorToast(err?.message || 'Failed to convert file.');
+    } catch (err: unknown) {
+      showErrorToast((err as Error)?.message || 'Failed to convert file.');
     }
   };
 
@@ -157,7 +149,7 @@ export default function DocsToExcelPage() {
     const firstSheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[firstSheetName];
     const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-    setSheetData(data as any[][]);
+    setSheetData(data as string[][]);
   };
 
   const handleDownload = () => {

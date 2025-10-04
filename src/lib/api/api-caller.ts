@@ -5,10 +5,10 @@ import { AppConstants } from '@/lib/utils/app-constants'
 // Log current environment (this will help verify)
 console.log('Current NODE_ENV:', process.env.NODE_ENV)
 
-interface ApiResponse {
+interface ApiResponse<T> {
   success: boolean
   message: string
-  data?: any
+  data?: T
   error?: {
     code?: string
   }
@@ -39,7 +39,7 @@ axiosInstance.interceptors.request.use(
 )
 
 // Handle API errors
-const handleApiError = (error: AxiosError<ApiResponse>) => {
+const handleApiError = <T>(error: AxiosError<ApiResponse<T>>) => {
   // Handle network errors
   if (!error.response) {
     const message = !navigator.onLine 
@@ -71,10 +71,16 @@ const handleApiError = (error: AxiosError<ApiResponse>) => {
 }
 
 // Add response interceptor for error handling and token refresh
+interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+// ...
+
 axiosInstance.interceptors.response.use(
   (response) => response.data,
-  async (error: AxiosError<ApiResponse>) => {
-    const originalRequest = error.config as any
+  async <T>(error: AxiosError<ApiResponse<T>>) => {
+    const originalRequest = error.config as CustomAxiosRequestConfig;
     const errorCode = error.response?.data?.error?.code
     const isLoginRoute = originalRequest?.url?.endsWith('/auth/login')
     
@@ -107,7 +113,7 @@ axiosInstance.interceptors.response.use(
         if (!isLoginRoute && typeof window !== 'undefined') {
           window.location.href = AppConstants.routes.login
         }
-        return handleApiError(refreshError as AxiosError<ApiResponse>)
+        return handleApiError(refreshError as AxiosError<ApiResponse<unknown>>)
       }
     }
 
@@ -124,7 +130,7 @@ export const getRequest = async <T>(url: string): Promise<T> => {
   }
 }
 
-export const postRequest = async <T>(url: string, body: any): Promise<T> => {
+export const postRequest = async <T, TBody>(url: string, body: TBody): Promise<T> => {
   try {
     return await axiosInstance.post(url, body)
   } catch (error) {
@@ -132,7 +138,7 @@ export const postRequest = async <T>(url: string, body: any): Promise<T> => {
   }
 }
 
-export const putRequest = async <T>(url: string, body: any): Promise<T> => {
+export const putRequest = async <T, TBody>(url: string, body: TBody): Promise<T> => {
   try {
     return await axiosInstance.put(url, body)
   } catch (error) {
@@ -140,7 +146,7 @@ export const putRequest = async <T>(url: string, body: any): Promise<T> => {
   }
 }
 
-export const patchRequest = async <T>(url: string, body: any): Promise<T> => {
+export const patchRequest = async <T, TBody>(url: string, body: TBody): Promise<T> => {
   try {
     return await axiosInstance.patch(url, body)
   } catch (error) {

@@ -7,7 +7,6 @@ import type {
   RegisterResponse,
   User,
 } from "@/lib/types/auth-types"
-import { redirect } from "next/navigation"
 
 const isServer = typeof window === 'undefined'
 
@@ -24,7 +23,7 @@ export class AuthService {
    */
   static async register(data: RegisterData): Promise<RegisterResponse> {
     try {
-      const response = await postRequest<RegisterResponse>(ApiEndpoints.auth.register, data)
+      const response = await postRequest<RegisterResponse, RegisterData>(ApiEndpoints.auth.register, data)
       
       if (response?.success && response?.data?.accessToken) {
         this.setAccessToken(response.data.accessToken)
@@ -44,7 +43,7 @@ export class AuthService {
    */
   static async login(data: LoginData): Promise<LoginResponse> {
     try {
-      const response = await postRequest<LoginResponse>(ApiEndpoints.auth.login, data)
+      const response = await postRequest<LoginResponse, LoginData>(ApiEndpoints.auth.login, data)
 
       if (response?.success && response?.data?.accessToken) {
         // Store token consistently
@@ -74,7 +73,7 @@ export class AuthService {
    */
   static async verifyEmail(token: string): Promise<void> {
     try {
-      await postRequest<void>(ApiEndpoints.auth.verifyEmail, { token })
+      await postRequest<void, { token: string }>(ApiEndpoints.auth.verifyEmail, { token })
     } catch (error) {
       throw error
     }
@@ -85,7 +84,7 @@ export class AuthService {
    */
   static async forgotPassword(email: string): Promise<void> {
     try {
-      await postRequest<void>(ApiEndpoints.auth.forgotPassword, { email })
+      await postRequest<void, { email: string }>(ApiEndpoints.auth.forgotPassword, { email })
     } catch (error) {
       throw error
     }
@@ -96,7 +95,7 @@ export class AuthService {
    */
   static async resetPassword(email: string, otp: string, newPassword: string): Promise<void> {
     try {
-      await postRequest<void>(ApiEndpoints.auth.resetPassword, { email, otp, newPassword })
+      await postRequest<void, { email: string, otp: string, newPassword: string }>(ApiEndpoints.auth.resetPassword, { email, otp, newPassword })
     } catch (error) {
       throw error
     }
@@ -183,7 +182,7 @@ export class AuthService {
    */
   static async verifyOtp(email: string, otp: string): Promise<void> {
     try {
-      await postRequest<void>(ApiEndpoints.auth.verifyOtp, { email, otp })
+      await postRequest<void, { email: string, otp: string }>(ApiEndpoints.auth.verifyOtp, { email, otp })
     } catch (error) {
       throw error
     }

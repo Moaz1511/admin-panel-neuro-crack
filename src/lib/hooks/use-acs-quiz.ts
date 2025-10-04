@@ -1,42 +1,42 @@
-import { useState, useCallback } from 'react'
-import { AcsQuizService, Course, Subject, Chapter, QuizModule } from '../services/acs-quiz.service'
-import { AppConstants } from '../utils/app-constants'
+import { useState, useCallback, useEffect } from 'react'
+import { AcsQuizService, Course, Subject, Chapter, QuizModule, Class } from '../services/acs-quiz.service'
 import { toast } from 'sonner'
 import React from 'react'
 
-// Define valid class values
-type ClassValue = '6' | '7' | '8' | '9' | '10'
+import { CircleAlert } from 'lucide-react'
 
 interface UseAcsQuizReturn {
+  classes: Class[]
   courses: Course[]
   subjects: Subject[]
   chapters: Chapter[]
   quizModules: QuizModule[]
+  isLoadingClasses: boolean
   isLoadingCourses: boolean
   isLoadingSubjects: boolean
   isLoadingChapters: boolean
   isLoadingQuizModules: boolean
-  error: string | null
-  fetchCoursesByClass: (classValue: ClassValue) => Promise<void>
-  fetchSubjectsByCourse: (courseId: string) => Promise<void>
-  fetchChaptersBySubject: (subjectId: string) => Promise<void>
+  fetchCoursesByClass: (classId: number) => void
+  fetchSubjectsByCourse: (courseId: number) => void
+  fetchChaptersBySubject: (subjectId: number) => void
   fetchQuizModules: (chapterId: string) => Promise<void>
 }
 
 export function useAcsQuiz(): UseAcsQuizReturn {
+  const [classes, setClasses] = useState<Class[]>([])
   const [courses, setCourses] = useState<Course[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [quizModules, setQuizModules] = useState<QuizModule[]>([])
+  const [isLoadingClasses, setIsLoadingClasses] = useState(false)
   const [isLoadingCourses, setIsLoadingCourses] = useState(false)
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false)
   const [isLoadingChapters, setIsLoadingChapters] = useState(false)
   const [isLoadingQuizModules, setIsLoadingQuizModules] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const showErrorToast = (message: string) => {
     toast(message, {
-      icon: React.createElement(require("lucide-react").CircleAlert, {
+      icon: React.createElement(CircleAlert, {
         className: "text-red-500",
         size: 20
       }),
@@ -44,48 +44,56 @@ export function useAcsQuiz(): UseAcsQuizReturn {
     })
   }
 
-  const fetchCoursesByClass = useCallback(async (classValue: ClassValue) => {
+  // Fetch all classes on component mount
+  useEffect(() => {
+    const fetchClasses = async () => {
+      setIsLoadingClasses(true)
+      try {
+        const classesData = await AcsQuizService.getAllClasses()
+        setClasses(classesData)
+      } catch {
+        showErrorToast('Failed to fetch classes')
+      } finally {
+        setIsLoadingClasses(false)
+      }
+    }
+    fetchClasses()
+  }, [])
+
+  const fetchCoursesByClass = useCallback(async (classId: number) => {
     setIsLoadingCourses(true)
-    setError(null)
     try {
-      const classKey = `class${classValue}` as keyof typeof AppConstants.subjectIds
-      const classId = AppConstants.subjectIds[classKey]
-      console.log('classId', classId)
-      const coursesData = await AcsQuizService.getCoursesByClass(classId)
-      setCourses(coursesData)
-    } catch (err) {
-    //   setError(err instanceof Error ? err.message : 'Failed to fetch courses')
-      showErrorToast('Something went wrong!')
+      const allCourses = await AcsQuizService.getAllCourses()
+      const filteredCourses = allCourses.filter(course => course.class_id === classId)
+      setCourses(filteredCourses)
+    } catch {
+      showErrorToast('Failed to fetch courses')
     } finally {
       setIsLoadingCourses(false)
     }
   }, [])
 
-  const fetchSubjectsByCourse = useCallback(async (courseId: string) => {
+  const fetchSubjectsByCourse = useCallback(async (courseId: number) => {
     setIsLoadingSubjects(true)
-    setError(null)
     try {
-      const subjectsData = await AcsQuizService.getSubjectsByCourse(courseId)
-      setSubjects(subjectsData)
-    } catch (err) {
-    //   const errorMessage = err instanceof Error ? err.message : 'Failed to fetch subjects'
-    //   setError(errorMessage)
-      showErrorToast('Something went wrong!')
+      const allSubjects = await AcsQuizService.getAllSubjects()
+      const filteredSubjects = allSubjects.filter(subject => subject.course_id === courseId)
+      setSubjects(filteredSubjects)
+    } catch {
+      showErrorToast('Failed to fetch subjects')
     } finally {
       setIsLoadingSubjects(false)
     }
   }, [])
 
-  const fetchChaptersBySubject = useCallback(async (subjectId: string) => {
+  const fetchChaptersBySubject = useCallback(async (subjectId: number) => {
     setIsLoadingChapters(true)
-    setError(null)
     try {
-      const chaptersData = await AcsQuizService.getChaptersBySubject(subjectId)
-      setChapters(chaptersData)
-    } catch (err) {
-    //   const errorMessage = err instanceof Error ? err.message : 'Failed to fetch chapters'
-    //   setError(errorMessage)
-      showErrorToast('Something went wrong!')
+      const allChapters = await AcsQuizService.getAllChapters()
+      const filteredChapters = allChapters.filter(chapter => chapter.subject_id === subjectId)
+      setChapters(filteredChapters)
+    } catch {
+      showErrorToast('Failed to fetch chapters')
     } finally {
       setIsLoadingChapters(false)
     }
@@ -93,32 +101,30 @@ export function useAcsQuiz(): UseAcsQuizReturn {
 
   const fetchQuizModules = useCallback(async (chapterId: string) => {
     setIsLoadingQuizModules(true)
-    setError(null)
     try {
       const modulesData = await AcsQuizService.getQuizModules(chapterId)
       setQuizModules(modulesData)
-    } catch (err) {
-    //   const errorMessage = err instanceof Error ? err.message : 'Failed to fetch quiz modules'
-    //   setError(errorMessage)
-      showErrorToast('Something went wrong!')
+    } catch {
+      showErrorToast('Failed to fetch quiz modules')
     } finally {
       setIsLoadingQuizModules(false)
     }
   }, [])
 
   return {
+    classes,
     courses,
     subjects,
     chapters,
     quizModules,
+    isLoadingClasses,
     isLoadingCourses,
     isLoadingSubjects,
     isLoadingChapters,
     isLoadingQuizModules,
-    error,
     fetchCoursesByClass,
     fetchSubjectsByCourse,
     fetchChaptersBySubject,
     fetchQuizModules
   }
-} 
+}

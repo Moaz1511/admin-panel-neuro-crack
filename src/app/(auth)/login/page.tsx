@@ -1,5 +1,6 @@
 'use client'
 
+import Image from "next/image";
 import { useAuth } from '@/lib/hooks/use-auth'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -79,10 +80,12 @@ export default function LoginPage() {
                 </div>
               </LoginFormActions>
               <div className="bg-muted relative hidden md:block">
-                <img
+                <Image
                   src="https://images.unsplash.com/photo-1602671737358-be33c742dd86?q=80&w=1200&auto=format&fit=crop"
                   alt="Login background - workspace with laptop and coffee"
-                  className="absolute inset-0 h-full w-full object-cover object-center dark:brightness-[0.2] dark:grayscale"
+                  layout="fill"
+                  objectFit="cover"
+                  className="dark:brightness-[0.2] dark:grayscale"
                 />
               </div>
             </CardContent>

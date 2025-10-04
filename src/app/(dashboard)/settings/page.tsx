@@ -1,7 +1,6 @@
 'use client'
 
 import { Settings, User, Bell, Lock, Palette, HelpCircle } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
 
 const settingsCategories = [
   {

@@ -1,149 +1,96 @@
-import { ApiEndpoints } from '../api/api-endpoints'
 import axios from 'axios'
+import { ApiEndpoints } from '@/lib/api/api-endpoints'
+
+export interface Class {
+  id: number;
+  name: string;
+}
 
 export interface Course {
-  id: string
-  name: string
+  id: number;
+  name: string;
+  class_id: number;
 }
 
 export interface Subject {
-  id: string
-  tagid: number
-  name: string
-  devremarks: string
-  serial: number
-  data: {
-    iconUrl: string
-  }
-  parent_id: null | string
-  description: null | string
-  is_active: boolean
-  month: null | string
-  status: null | string
-  free_content_available: boolean
-  tagtype: number
-  type: string
+  id: number;
+  name: string;
+  class_id: number;
+  course_id: number;
 }
 
 export interface Chapter {
-  id: string
-  name: string
-  description?: string
+  id: number;
+  name: string;
+  subject_id: number;
 }
 
 export interface QuizModule {
   id: string
   name: string
-  createdat: string
-  updatedat: string
-  courseid: string
-  isActive: boolean
-  data: {
-    thumbnail?: string
-    notesPdfLink?: string
-    numberOfPages?: string
-  } | null
   type: number
-  show_title: boolean
-  course_id_2: string | null
-  is_locked: boolean
-  demo_course_only: boolean | null
-  tagtype: number
-  moduleTagId: string
-  serial: number | null
 }
 
-export class AcsQuizService {
-  private static readonly headers = {
-    'x-api-key': process.env.NEXT_PUBLIC_PARTNER_API_KEY || ''
-  }
-
-  static async getCoursesByClass(classId: string): Promise<Course[]> {
+export const AcsQuizService = {
+  getAllClasses: async (): Promise<Class[]> => {
     try {
-      console.log('Debug Info:', {
-        classId,
-        apiKey: process.env.NEXT_PUBLIC_PARTNER_API_KEY,
-        baseUrl: ApiEndpoints.acsQuiz.getCourses,
-        fullUrl: `${ApiEndpoints.acsQuiz.getCourses}${classId}`,
-        headers: this.headers
-      })
-
-      const response = await axios.get(
-        `${ApiEndpoints.acsQuiz.getCourses}${classId}`,
-        { 
-          headers: { 
-            'x-api-key': process.env.NEXT_PUBLIC_PARTNER_API_KEY
-          }
-        }
-      )
-      return response.data
+      const response = await axios.get(`${ApiEndpoints.classes.getAll}`)
+      return response.data.data || []
     } catch (error) {
-      throw this.handleError(error)
+      console.error('Error fetching classes:', error)
+      throw error
     }
-  }
+  },
 
-  static async getSubjectsByCourse(courseId: string): Promise<Subject[]> {
+  getAllCourses: async (): Promise<Course[]> => {
     try {
-      const response = await axios.get(
-        `${ApiEndpoints.acsQuiz.getSubjects}${courseId}`,
-        { 
-          headers: { 
-            'x-api-key': process.env.NEXT_PUBLIC_PARTNER_API_KEY 
-          }
-        }
-      )
-      return response.data
+      const response = await axios.get(`${ApiEndpoints.courses.getAll}`)
+      return response.data.data || []
     } catch (error) {
-      throw this.handleError(error)
+      console.error('Error fetching courses:', error)
+      throw error
     }
-  }
+  },
 
-  static async getChaptersBySubject(subjectId: string): Promise<Chapter[]> {
+  getAllSubjects: async (): Promise<Subject[]> => {
     try {
-      const response = await axios.get(
-        `${ApiEndpoints.acsQuiz.getChapters}${subjectId}`,
-        { 
-          headers: { 
-            'x-api-key': process.env.NEXT_PUBLIC_PARTNER_API_KEY 
-          }
-        }
-      )
-      return response.data
+      const response = await axios.get(`${ApiEndpoints.subjects.getAll}`)
+      return response.data.data || []
     } catch (error) {
-      throw this.handleError(error)
+      console.error('Error fetching subjects:', error)
+      throw error
     }
-  }
+  },
 
-  static async getQuizModules(chapterId: string): Promise<QuizModule[]> {
+  getSubjectsByCourse: async (courseId: number): Promise<Subject[]> => {
     try {
-      const response = await axios.get(
-        `${ApiEndpoints.acsQuiz.getQuizModules}${chapterId}`,
-        { 
-          headers: { 
-            'x-api-key': process.env.NEXT_PUBLIC_PARTNER_API_KEY 
-          }
-        }
-      )
-      return response.data
+      const response = await axios.get(`${ApiEndpoints.subjects.getByCourseId}${courseId}`)
+      return response.data.data || []
     } catch (error) {
-      throw this.handleError(error)
+      console.error('Error fetching subjects by course:', error)
+      throw error
     }
-  }
+  },
 
-  private static handleError(error: any): Error {
-    console.error('API Error:', {
-      status: error.response?.status,
-      message: error.response?.data?.message,
-      headers: error.config?.headers,
-      url: error.config?.url
-    })
-
-    if (axios.isAxiosError(error)) {
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        return new Error('Invalid or missing API key. Please check your environment configuration.')
-      }
-      return new Error(error.response?.data?.message || 'An error occurred while fetching data')
+  getAllChapters: async (): Promise<Chapter[]> => {
+    try {
+      const response = await axios.get(`${ApiEndpoints.chapters.getAll}`)
+      return response.data.data || []
+    }  catch (error) {
+      console.error('Error fetching chapters:', error)
+      throw error
     }
-    return new Error('An unexpected error occurred')
-  }
+  },
+
+  getQuizModules: async (chapterId: string): Promise<QuizModule[]> => {
+    try {
+      console.log('Fetching quiz modules for chapter:', chapterId)
+      // Assuming a new endpoint for quiz modules will be created or fetched differently
+      // For now, returning an empty array or mock data
+      return []
+    } catch (error) {
+      console.error('Error fetching quiz modules:', error)
+      throw error
+    }
+  },
 }

@@ -5,10 +5,7 @@
  */
 
 // Remove trailing slash from base URL
-export const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://192.168.0.101:5000").replace(/\/$/, '')
-export const acsQuizBaseUrl = process.env.NEXT_PUBLIC_ACS_QUIZ_URL || "http://192.168.0.101:2090/api/modules/partner"
-export const aiBaseUrl = process.env.NEXT_PUBLIC_AI_URL || "http://192.168.0.101:8000"
-
+export const baseUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000").replace(/\/$/, '')
 export const ApiEndpoints = {
   auth: {
     register: `${baseUrl}/auth/register`,
@@ -20,22 +17,31 @@ export const ApiEndpoints = {
     verifyOtp: `${baseUrl}/auth/verify-otp`
   },
 
-
-  acsQuiz: {
-    getCourses: `${acsQuizBaseUrl}/getCoursesByClass/`,
-    getSubjects: `${acsQuizBaseUrl}/getSubjectsByCourse/`,
-    getChapters: `${acsQuizBaseUrl}/getChaptersBySubject/`,
-    getQuizModules: `${acsQuizBaseUrl}/getModules/`,
+  classes: {
+    getAll: `${baseUrl}/api/classes`,
+    getById: `${baseUrl}/api/classes/`,
   },
-
-  ai: {
-    uploadDocx: `${aiBaseUrl}/upload-docx`,
+  subjects: {
+    getAll: `${baseUrl}/api/subjects`,
+    getById: `${baseUrl}/api/subjects/`,
+    getByCourseId: `${baseUrl}/api/subjects/course/`,
+  },
+  chapters: {
+    getAll: `${baseUrl}/api/chapters`,
+    getById: `${baseUrl}/api/chapters/`,
+  },
+  courses: {
+    getAll: `${baseUrl}/api/courses`,
+    getById: `${baseUrl}/api/courses/`,
   },
 
   // Add other feature endpoints here as the application grows
   // Example:
-  // users: {
-  //   profile: '/users/profile',
-  //   settings: '/users/settings',
-  // }
+  users: {
+    getAll: `${baseUrl}/api/user`,
+    getById: `${baseUrl}/api/user/`,
+  },
+  ai: {
+    uploadDocx: `${baseUrl}/api/ai/upload-docx`,
+  }
 } 

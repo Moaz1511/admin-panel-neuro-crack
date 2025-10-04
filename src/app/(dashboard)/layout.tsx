@@ -49,7 +49,6 @@ interface User {
 interface SidebarProps {
   user: User | null
   expanded?: boolean
-  onExpand?: () => void
   onLogout: () => void
 }
 
@@ -58,10 +57,9 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, isAuthenticated, isLoading, logout } = useAuth()
+  const { user, isLoading, logout } = useAuth()
   const [expanded, setExpanded] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
-  const pathname = usePathname()
 
   useEffect(() => {
     const handleResize = () => {
@@ -116,7 +114,6 @@ export default function DashboardLayout({
           <DesktopSidebar
             user={user}
             expanded={expanded}
-            onExpand={() => setExpanded(!expanded)}
             onLogout={logout}
           />
         </aside>
@@ -158,7 +155,7 @@ export default function DashboardLayout({
 }
 
 // Desktop Sidebar Component
-function DesktopSidebar({ user, expanded, onExpand, onLogout }: SidebarProps) {
+function DesktopSidebar({ user, expanded, onLogout }: SidebarProps) {
   const pathname = usePathname()
   
   return (

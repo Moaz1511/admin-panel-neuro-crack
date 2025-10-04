@@ -14,8 +14,11 @@ export class DocsToExcelService {
         },
       });
       return response.data as Blob;
-    } catch (error: any) {
-      throw error?.response?.data || error.message || 'Failed to convert file';
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        throw error?.response?.data || error.message || 'Failed to convert file';
+      }
+      throw 'Failed to convert file';
     }
   }
 } 
