@@ -2,11 +2,15 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, GripVertical, Pencil, Trash2 } from 'lucide-react'
+import { QuestionFormModal } from './question-form-modal'
+import axios from 'axios';
+import { ApiEndpoints } from '@/lib/api/api-endpoints';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Imports for the new drag-and-drop library
+// ... dnd-kit imports ...
 import {
   DndContext,
   closestCenter,
@@ -25,92 +29,97 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
+
 // Define the types for our question structure
-type Option = string;
 interface Question {
   id: string;
-  title: string;
-  options: Option[];
-  correctAnswerIndex: number;
-  explanation: string;
+  type: 'mcq' | 'saq' | 'cq';
+  title?: string; // For MCQ/SAQ
+  uddipok?: string; // For CQ
+  options?: string[]; // For MCQ
+  correctAnswerIndex?: number; // For MCQ
+  explanation?: string;
+  sub_questions?: { question_text: string; answer_text: string }[]; // For CQ
 }
 
-// Dummy data to simulate existing questions
-const initialQuestions: Question[] = [
-    { id: 'q1', title: '<p>Q = { 1,a} হলে P(Q) নিচের কোনটি?</p>', options: ['{ 1,a}', '{ 1},{ a},{ 1,a}', '{{1}, {a}, {1,a}, ∅}', '{{1}, {a}, {1,a} {∅}}'], correctAnswerIndex: 2, explanation: '<p>The power set includes all subsets, including the empty set.</p>' },
-    { id: 'q2', title: '<p>A = { 1,2,3}  হলে,  P(A)  এর উপাদান সংখ্যা কত?</p>', options: ['3', '7', '8', '9'], correctAnswerIndex: 2, explanation: '<p>The number of elements in the power set is 2^n, where n is the number of elements in the original set.</p>' },
-];
-
 // A new component for a single sortable question item
-function SortableQuestionItem({ q, index }: { q: Question; index: number }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id: q.id });
+function SortableQuestionItem({ q, index, onEdit, onDelete }: { q: Question; index: number; onEdit: (question: Question) => void; onDelete: (id: string, type: string) => void; }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: q.id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
+  const renderQuestionContent = () => {
+    switch (q.type) {
+      case 'cq':
+        return (
+          <div>
+            <div className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: q.uddipok }} />
+            {/* Render sub-questions here */}
+          </div>
+        );
+      default:
+        return (
+          <div>
+            <div className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: q.title }} />
+            <div className="space-y-3 mt-4">
+              {q.options.map((option, optionIndex) => (
+                <div key={optionIndex} className={`flex items-center p-3 rounded-md ${q.correctAnswerIndex === optionIndex ? 'bg-green-100 border-green-400 border' : 'bg-muted/50'}`}>
+                  <span className="mr-3 font-semibold">{optionIndex + 1}</span>
+                  <div dangerouslySetInnerHTML={{ __html: option }} />
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 bg-gray-50 p-4 rounded-md">
+              <h4 className="font-semibold mb-2">Explanation</h4>
+              <div className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: q.explanation }} />
+            </div>
+          </div>
+        );
+    }
+  }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="rounded-lg border bg-card text-card-foreground shadow-sm"
-    >
+    <div ref={setNodeRef} style={style} className="rounded-lg border bg-card text-card-foreground shadow-sm">
       <div className="flex items-center bg-muted/50 rounded-t-lg p-2 border-b">
         <div {...attributes} {...listeners} className="p-2 cursor-grab">
           <GripVertical className="h-5 w-5 text-muted-foreground" />
         </div>
-        <span className="font-semibold text-sm">Question {index + 1}</span>
+        <span className="font-semibold text-sm">Question {index + 1} ({q.type.toUpperCase()})</span>
+        <div className="ml-auto flex gap-2">
+            <Button variant="outline" size="icon" onClick={() => onEdit(q)}><Pencil className="h-4 w-4" /></Button>
+            <Button variant="destructive" size="icon" onClick={() => onDelete(q.id, q.type)}><Trash2 className="h-4 w-4" /></Button>
+        </div>
       </div>
       <div className="p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: q.title }} />
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon"><Pencil className="h-4 w-4" /></Button>
-            <Button variant="destructive" size="icon"><Trash2 className="h-4 w-4" /></Button>
-          </div>
-        </div>
-        <div className="space-y-3">
-          {q.options.map((option, optionIndex) => (
-            <div
-              key={optionIndex}
-              className={`flex items-center p-3 rounded-md ${q.correctAnswerIndex === optionIndex ? 'bg-green-100 border-green-400 border' : 'bg-muted/50'}`}
-            >
-              <span className="mr-3 font-semibold">{optionIndex + 1}</span>
-              <div dangerouslySetInnerHTML={{ __html: option }} />
-            </div>
-          ))}
-        </div>
-        <div className="mt-6 bg-gray-50 p-4 rounded-md">
-          <h4 className="font-semibold mb-2">Explanation</h4>
-          <div className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: q.explanation }} />
-        </div>
+        {renderQuestionContent()}
       </div>
     </div>
   );
 }
 
-export function QuestionManager({ moduleId: _moduleId }: { moduleId: string }) {
-  const [questions, setQuestions] = useState<Question[]>(initialQuestions)
-  // TODO: Use moduleId to fetch actual questions for the module
-  // For example:
-  // useEffect(() => {
-  //   if (moduleId) {
-  //     fetchQuestions(moduleId).then(setQuestions);
-  //   }
-  // }, [moduleId]);
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+
+export function QuestionManager({ moduleId }: { moduleId: string }) {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [newQuestionType, setNewQuestionType] = useState('mcq');
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
+
+  useEffect(() => {
+    if (moduleId !== 'new') {
+        const fetchQuestions = async () => {
+            try {
+                const response = await axios.get(`${ApiEndpoints.quizzes.getById}${moduleId}`);
+                const quizData = response.data.data;
+                const mcqs = (quizData.questions || []).map((q: any) => ({ ...q, type: 'mcq' }));
+                const cqs = (quizData.cqs || []).map((c: any) => ({ ...c, type: 'cq' }));
+                setQuestions([...mcqs, ...cqs]);
+            } catch (error) {
+                console.error('Error fetching questions:', error);
+            }
+        };
+        fetchQuestions();
+    }
+  }, [moduleId]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -122,47 +131,104 @@ export function QuestionManager({ moduleId: _moduleId }: { moduleId: string }) {
       });
     }
   };
-  
-  const addQuestion = () => {
-    const newQuestion: Question = {
-        id: `q${new Date().getTime()}`,
-        title: '',
-        options: ['', '', '', ''],
-        correctAnswerIndex: 0,
-        explanation: ''
-    };
-    setQuestions([...questions, newQuestion]);
-  }
+
+  const handleAddQuestion = () => {
+    setEditingQuestion(null);
+    setIsModalOpen(true);
+  };
+
+  const handleEditQuestion = (question: Question) => {
+    setEditingQuestion(question);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteQuestion = async (id: string, type: string) => {
+    try {
+        if (type === 'cq') {
+            await axios.delete(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs/${id}`);
+        } else {
+            await axios.delete(`${ApiEndpoints.quizzes.base}/${moduleId}/questions/${id}`);
+        }
+        setQuestions(questions.filter(q => q.id !== id));
+    } catch (error) {
+        console.error('Error deleting question:', error);
+    }
+  };
+
+  const handleSaveQuestion = async (savedQuestion: Question) => {
+    savedQuestion.type = editingQuestion ? editingQuestion.type : newQuestionType as any;
+    if (savedQuestion.id) {
+        // Update
+        try {
+            let response;
+            if (savedQuestion.type === 'cq') {
+                response = await axios.put(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs/${savedQuestion.id}`, savedQuestion);
+            } else {
+                response = await axios.put(`${ApiEndpoints.quizzes.base}/${moduleId}/questions/${savedQuestion.id}`, savedQuestion);
+            }
+            setQuestions(questions.map(q => q.id === savedQuestion.id ? response.data : q));
+        } catch (error) {
+            console.error('Error updating question:', error);
+        }
+    } else {
+        // Create
+        try {
+            let response;
+            if (savedQuestion.type === 'cq') {
+                response = await axios.post(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs`, savedQuestion);
+            } else {
+                response = await axios.post(`${ApiEndpoints.quizzes.base}/${moduleId}/questions`, savedQuestion);
+            }
+            setQuestions([...questions, response.data]);
+        } catch (error) {
+            console.error('Error creating question:', error);
+        }
+    }
+  };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Exam Questions</h1>
         <div className="flex gap-4">
-          <Button onClick={addQuestion}>
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Question
-          </Button>
+            <Select onValueChange={setNewQuestionType} defaultValue="mcq">
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select question type" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="mcq">MCQ</SelectItem>
+                    <SelectItem value="saq">SAQ</SelectItem>
+                    <SelectItem value="cq">CQ</SelectItem>
+                </SelectContent>
+            </Select>
+          <Button onClick={handleAddQuestion}><Plus className="h-4 w-4 mr-2" /> Add New Question</Button>
           <Button variant="outline">Import Questions</Button>
         </div>
       </div>
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={questions}
-          strategy={verticalListSortingStrategy}
-        >
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={questions} strategy={verticalListSortingStrategy}>
           <div className="space-y-6">
             {questions.map((q, index) => (
-              <SortableQuestionItem key={q.id} q={q} index={index} />
+              <SortableQuestionItem 
+                key={q.id} 
+                q={q} 
+                index={index} 
+                onEdit={handleEditQuestion} 
+                onDelete={handleDeleteQuestion} 
+              />
             ))}
           </div>
         </SortableContext>
       </DndContext>
+
+      <QuestionFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveQuestion}
+        initialQuestion={editingQuestion}
+        quizType={editingQuestion ? editingQuestion.type : newQuestionType}
+      />
     </div>
-  )
+  );
 }

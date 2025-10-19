@@ -30,9 +30,28 @@ export const ApiEndpoints = {
     getAll: `${baseUrl}/api/chapters`,
     getById: `${baseUrl}/api/chapters/`,
   },
+  topics: {
+    getByChapterId: `${baseUrl}/api/topics/chapter/`,
+  },
   courses: {
     getAll: `${baseUrl}/api/courses`,
     getById: `${baseUrl}/api/courses/`,
+  },
+  quizzes: {
+    base: `${baseUrl}/api/quizzes`,
+    getByChapterId: `${baseUrl}/api/quizzes/chapter/`,
+    getById: `${baseUrl}/api/quizzes/`,
+    create: `${baseUrl}/api/quizzes`,
+    update: `${baseUrl}/api/quizzes/`,
+  },
+  questions: {
+    create: `${baseUrl}/api/quizzes/`,
+    update: `${baseUrl}/api/questions/`,
+    delete: `${baseUrl}/api/questions/`,
+  },
+  cqs: {
+    update: `${baseUrl}/api/cqs/`,
+    delete: `${baseUrl}/api/cqs/`,
   },
 
   // Add other feature endpoints here as the application grows

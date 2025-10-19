@@ -85,9 +85,13 @@ export const AcsQuizService = {
   getQuizModules: async (chapterId: string): Promise<QuizModule[]> => {
     try {
       console.log('Fetching quiz modules for chapter:', chapterId)
-      // Assuming a new endpoint for quiz modules will be created or fetched differently
-      // For now, returning an empty array or mock data
-      return []
+      const response = await axios.get(`${ApiEndpoints.quizzes.getByChapterId}${chapterId}`)
+      const quizzes = response.data.data || []
+      return quizzes.map((quiz: any) => ({
+        id: quiz.id.toString(),
+        name: quiz.title,
+        type: 3,
+      }));
     } catch (error) {
       console.error('Error fetching quiz modules:', error)
       throw error
