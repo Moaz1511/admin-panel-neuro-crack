@@ -32,7 +32,10 @@ import { Separator } from '@/components/ui/separator'
 // Navigation items configuration
 const navigationItems = [
   { name: 'Dashboard', icon: Home, href: '/dashboard' },
-  { name: 'Create Quiz', icon: FileQuestion, href: '/create-quiz' },
+  { name: 'Create Exam', icon: FileQuestion, href: '/create-exam' },
+  { name: 'Create MCQ', icon: FileQuestion, href: '/create-quiz' },
+  { name: 'Create CQ', icon: FileQuestion, href: '/create-cq' },
+  { name: 'Create SAQ', icon: FileQuestion, href: '/create-saq' },
   { name: 'Upload Quiz', icon: Upload, href: '/upload-quiz' },
   { name: 'Teacher Profile', icon: UserCircle, href: '/profile' },
   { name: 'Settings', icon: Settings, href: '/settings' },

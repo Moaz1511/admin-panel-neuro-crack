@@ -21,10 +21,19 @@ export const ApiEndpoints = {
     getAll: `${baseUrl}/api/classes`,
     getById: `${baseUrl}/api/classes/`,
   },
+  programs: {
+    getAll: `${baseUrl}/api/programs`,
+    getById: `${baseUrl}/api/programs/`,
+  },
+  groups: {
+    getAll: `${baseUrl}/api/groups`,
+    getById: `${baseUrl}/api/groups/`,
+    getByClassId: `${baseUrl}/api/groups/class/`,
+  },
   subjects: {
     getAll: `${baseUrl}/api/subjects`,
     getById: `${baseUrl}/api/subjects/`,
-    getByCourseId: `${baseUrl}/api/subjects/course/`,
+    getByGroupId: `${baseUrl}/api/subjects/group/`,
   },
   chapters: {
     getAll: `${baseUrl}/api/chapters`,
@@ -32,10 +41,6 @@ export const ApiEndpoints = {
   },
   topics: {
     getByChapterId: `${baseUrl}/api/topics/chapter/`,
-  },
-  courses: {
-    getAll: `${baseUrl}/api/courses`,
-    getById: `${baseUrl}/api/courses/`,
   },
   quizzes: {
     base: `${baseUrl}/api/quizzes`,
@@ -45,7 +50,7 @@ export const ApiEndpoints = {
     update: `${baseUrl}/api/quizzes/`,
   },
   questions: {
-    create: `${baseUrl}/api/quizzes/`,
+    create: `${baseUrl}/api/questions`,
     update: `${baseUrl}/api/questions/`,
     delete: `${baseUrl}/api/questions/`,
   },

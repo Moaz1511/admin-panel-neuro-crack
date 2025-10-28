@@ -28,8 +28,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${jakarta.variable} min-h-screen bg-background font-sans antialiased`}
-      >
+        suppressHydrationWarning
+        className={`${inter.variable} ${jakarta.variable} min-h-screen bg-background font-sans antialiased`}>
         <main className="relative flex min-h-screen flex-col">
           {children}
         </main>

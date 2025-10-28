@@ -6,17 +6,23 @@ export interface Class {
   name: string;
 }
 
-export interface Course {
+export interface Program {
   id: number;
   name: string;
   class_id: number;
 }
 
-export interface Subject {
+export interface Group {
   id: number;
   name: string;
   class_id: number;
-  course_id: number;
+  program_id: number;
+}
+
+export interface Subject {
+  id: number;
+  name: string;
+  group_id: number;
 }
 
 export interface Chapter {
@@ -42,12 +48,22 @@ export const AcsQuizService = {
     }
   },
 
-  getAllCourses: async (): Promise<Course[]> => {
+  getAllPrograms: async (): Promise<Program[]> => {
     try {
-      const response = await axios.get(`${ApiEndpoints.courses.getAll}`)
+      const response = await axios.get(`${ApiEndpoints.programs.getAll}`)
       return response.data.data || []
     } catch (error) {
-      console.error('Error fetching courses:', error)
+      console.error('Error fetching programs:', error)
+      throw error
+    }
+  },
+
+  getGroupsByClass: async (classId: number): Promise<Group[]> => {
+    try {
+      const response = await axios.get(`${ApiEndpoints.groups.getByClassId}${classId}`)
+      return response.data.data || []
+    } catch (error) {
+      console.error('Error fetching groups by class:', error)
       throw error
     }
   },
@@ -62,12 +78,12 @@ export const AcsQuizService = {
     }
   },
 
-  getSubjectsByCourse: async (courseId: number): Promise<Subject[]> => {
+  getSubjectsByGroup: async (groupId: number): Promise<Subject[]> => {
     try {
-      const response = await axios.get(`${ApiEndpoints.subjects.getByCourseId}${courseId}`)
+      const response = await axios.get(`${ApiEndpoints.subjects.getByGroupId}${groupId}`)
       return response.data.data || []
     } catch (error) {
-      console.error('Error fetching subjects by course:', error)
+      console.error('Error fetching subjects by group:', error)
       throw error
     }
   },

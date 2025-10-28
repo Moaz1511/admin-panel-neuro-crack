@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { AcsQuizService, Course, Subject, Chapter, QuizModule, Class } from '../services/acs-quiz.service'
+import { AcsQuizService, Program, Group, Subject, Chapter, QuizModule, Class } from '../services/acs-quiz.service'
 import { toast } from 'sonner'
 import React from 'react'
 
@@ -7,29 +7,34 @@ import { CircleAlert } from 'lucide-react'
 
 interface UseAcsQuizReturn {
   classes: Class[]
-  courses: Course[]
+  programs: Program[]
+  groups: Group[]
   subjects: Subject[]
   chapters: Chapter[]
   quizModules: QuizModule[]
   isLoadingClasses: boolean
-  isLoadingCourses: boolean
+  isLoadingPrograms: boolean
+  isLoadingGroups: boolean
   isLoadingSubjects: boolean
   isLoadingChapters: boolean
   isLoadingQuizModules: boolean
-  fetchCoursesByClass: (classId: number) => void
-  fetchSubjectsByCourse: (courseId: number) => void
+  fetchProgramsByClass: (classId: number) => void
+  fetchGroupsByProgram: (programId: number) => void
+  fetchSubjectsByGroup: (groupId: number) => void
   fetchChaptersBySubject: (subjectId: number) => void
   fetchQuizModules: (chapterId: string) => Promise<void>
 }
 
 export function useAcsQuiz(): UseAcsQuizReturn {
   const [classes, setClasses] = useState<Class[]>([])
-  const [courses, setCourses] = useState<Course[]>([])
+  const [programs, setPrograms] = useState<Program[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [chapters, setChapters] = useState<Chapter[]>([])
   const [quizModules, setQuizModules] = useState<QuizModule[]>([])
   const [isLoadingClasses, setIsLoadingClasses] = useState(false)
-  const [isLoadingCourses, setIsLoadingCourses] = useState(false)
+  const [isLoadingPrograms, setIsLoadingPrograms] = useState(false)
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false)
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(false)
   const [isLoadingChapters, setIsLoadingChapters] = useState(false)
   const [isLoadingQuizModules, setIsLoadingQuizModules] = useState(false)
@@ -60,24 +65,37 @@ export function useAcsQuiz(): UseAcsQuizReturn {
     fetchClasses()
   }, [])
 
-  const fetchCoursesByClass = useCallback(async (classId: number) => {
-    setIsLoadingCourses(true)
+  const fetchProgramsByClass = useCallback(async (classId: number) => {
+    setIsLoadingPrograms(true)
     try {
-      const allCourses = await AcsQuizService.getAllCourses()
-      const filteredCourses = allCourses.filter(course => course.class_id === classId)
-      setCourses(filteredCourses)
+      const allPrograms = await AcsQuizService.getAllPrograms()
+      const filteredPrograms = allPrograms.filter(program => program.class_id === classId)
+      setPrograms(filteredPrograms)
     } catch {
-      showErrorToast('Failed to fetch courses')
+      showErrorToast('Failed to fetch programs')
     } finally {
-      setIsLoadingCourses(false)
+      setIsLoadingPrograms(false)
     }
   }, [])
 
-  const fetchSubjectsByCourse = useCallback(async (courseId: number) => {
+  const fetchGroupsByProgram = useCallback(async (programId: number) => {
+    setIsLoadingGroups(true)
+    try {
+      const allGroups = await AcsQuizService.getAllGroups()
+      const filteredGroups = allGroups.filter(group => group.program_id === programId)
+      setGroups(filteredGroups)
+    } catch {
+      showErrorToast('Failed to fetch groups')
+    } finally {
+      setIsLoadingGroups(false)
+    }
+  }, [])
+
+  const fetchSubjectsByGroup = useCallback(async (groupId: number) => {
     setIsLoadingSubjects(true)
     try {
       const allSubjects = await AcsQuizService.getAllSubjects()
-      const filteredSubjects = allSubjects.filter(subject => subject.course_id === courseId)
+      const filteredSubjects = allSubjects.filter(subject => subject.group_id === groupId)
       setSubjects(filteredSubjects)
     } catch {
       showErrorToast('Failed to fetch subjects')
@@ -113,17 +131,20 @@ export function useAcsQuiz(): UseAcsQuizReturn {
 
   return {
     classes,
-    courses,
+    programs,
+    groups,
     subjects,
     chapters,
     quizModules,
     isLoadingClasses,
-    isLoadingCourses,
+    isLoadingPrograms,
+    isLoadingGroups,
     isLoadingSubjects,
     isLoadingChapters,
     isLoadingQuizModules,
-    fetchCoursesByClass,
-    fetchSubjectsByCourse,
+    fetchProgramsByClass,
+    fetchGroupsByProgram,
+    fetchSubjectsByGroup,
     fetchChaptersBySubject,
     fetchQuizModules
   }

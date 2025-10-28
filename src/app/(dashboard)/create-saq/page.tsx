@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useForm, useFieldArray, FormProvider, Controller } from 'react-hook-form';
+import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -14,17 +14,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import axios from 'axios';
-import { FileUpload } from '@/components/ui/file-upload';
-import { OptionsFieldArray } from './OptionsFieldArray';
 import dynamic from 'next/dynamic';
 
 const QuillEditor = dynamic(
   () => import('@/components/shared/QuillEditor'),
   { ssr: false }
 );
-
 
 const formSchema = z.object({
   program_id: z.string().min(1, { message: "Program is required" }),
@@ -35,28 +31,19 @@ const formSchema = z.object({
   topic_id: z.string().min(1, { message: "Topic is required" }),
   questions: z.array(z.object({
     question: z.string().min(1, { message: "Question is required" }),
-    question_image_url: z.string().optional(),
-    question_video_url: z.string().optional(),
-    question_audio_url: z.string().optional(),
-    difficulty: z.string().min(1, { message: "Difficulty is required" }),
-    reference: z.string().min(1, { message: "Reference is required" }),
-    correctAnswerIndex: z.string().min(1, { message: "A correct answer must be selected" }),
-    options: z.array(z.object({
-      text: z.string().min(1, { message: "Option text is required" }),
-      image_type: z.enum(["link", "file"]).optional(),
-      image_link: z.string().optional(),
-      image_file: z.any().optional(),
-      video_type: z.enum(["link", "file"]).optional(),
-      video_link: z.string().optional(),
-      video_file: z.any().optional(),
-      audio_type: z.enum(["link", "file"]).optional(),
-      audio_link: z.string().optional(),
-      audio_file: z.any().optional(),
-    })).min(2, { message: "At least two options are required" }),
+    question_media_type: z.enum(["link", "file"]).optional(),
+    question_media_link: z.string().optional(),
+    question_media_file: z.any().optional(),
+    answer: z.string().min(1, { message: "Answer is required" }),
+    answer_media_type: z.enum(["link", "file"]).optional(),
+    answer_media_link: z.string().optional(),
+    answer_media_file: z.any().optional(),
+    explanation: z.string().optional(),
+    difficulty: z.enum(["Easy", "Medium", "Hard"]),
   })).min(1, { message: "At least one question is required" })
 });
 
-export default function CreateQuizPage() {
+export default function CreateSaqPage() {
   const [programs, setPrograms] = useState([]);
   const [classes, setClasses] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -74,7 +61,7 @@ export default function CreateQuizPage() {
   const methods = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      questions: [],
+      questions: [{ question: '', answer: '' }]
     }
   });
 
@@ -82,6 +69,12 @@ export default function CreateQuizPage() {
     control: methods.control,
     name: "questions"
   });
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const programId = methods.watch('program_id');
   const classId = methods.watch('class_id');
@@ -239,26 +232,28 @@ export default function CreateQuizPage() {
 
   const onSubmit = async (data: any) => {
     console.log('Submitting data:', data);
-
     setIsSubmitting(true);
+
+    const promises = data.questions.map(q => {
+      const payload = {
+        program_id: data.program_id,
+        class_id: data.class_id,
+        group_id: data.group_id,
+        subject_id: data.subject_id,
+        chapter_id: data.chapter_id,
+        topic_id: data.topic_id,
+        question_text: q.question,
+        answer_text: q.answer,
+      };
+      return axios.post('http://localhost:9000/api/saqs', payload);
+    });
+
     try {
-      for (const q of data.questions) {
-        const transformedQuestion = {
-          topic_id: data.topic_id,
-          question_text: q.question,
-          difficulty_level: q.difficulty,
-          reference: q.reference,
-          options: q.options.map((opt: any, index: number) => ({
-            option_text: opt.text,
-            is_correct: index.toString() === q.correctAnswerIndex,
-          })),
-        };
-        await axios.post('http://localhost:9000/api/questions', transformedQuestion);
-      }
-      alert('MCQs created successfully!');
+      await Promise.all(promises);
+      alert('SAQs created successfully!');
     } catch (error) {
-      console.error('Error creating MCQs:', error);
-      alert('Error creating MCQs. Please check the console for details.');
+      console.error('Error creating SAQs:', error);
+      alert('Error creating SAQs. Please check the console for details.');
     } finally {
       setIsSubmitting(false);
     }
@@ -270,12 +265,12 @@ export default function CreateQuizPage() {
         <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-8">
           <Card>
             <CardHeader>
-              <CardTitle>Create MCQ</CardTitle>
+              <CardTitle>Create SAQ</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
-                  <label htmlFor="program_id">Program</label>
+                  <label htmlFor="program_id" className="block text-sm font-medium text-gray-700">Program</label>
                   <Select onValueChange={(value) => methods.setValue('program_id', value)}>
                     <SelectTrigger id="program_id">
                       <SelectValue placeholder={programsLoading ? "Loading..." : "Select Program"} />
@@ -288,10 +283,10 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.program_id && <p className="text-red-500">{methods.formState.errors.program_id.message}</p>}
+                  {methods.formState.errors.program_id && <p className="text-sm text-red-500">{methods.formState.errors.program_id.message}</p>}
                 </div>
                 <div>
-                  <label htmlFor="class_id">Class</label>
+                  <label htmlFor="class_id" className="block text-sm font-medium text-gray-700">Class</label>
                   <Select onValueChange={(value) => methods.setValue('class_id', value)} disabled={!programId || classesLoading}>
                     <SelectTrigger id="class_id">
                       <SelectValue placeholder={classesLoading ? "Loading..." : "Select Class"} />
@@ -304,10 +299,10 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.class_id && <p className="text-red-500">{methods.formState.errors.class_id.message}</p>}
+                  {methods.formState.errors.class_id && <p className="text-sm text-red-500">{methods.formState.errors.class_id.message}</p>}
                 </div>
                 <div>
-                  <label htmlFor="group_id">Group</label>
+                  <label htmlFor="group_id" className="block text-sm font-medium text-gray-700">Group</label>
                   <Select onValueChange={(value) => methods.setValue('group_id', value)} disabled={!classId || groupsLoading}>
                     <SelectTrigger id="group_id">
                       <SelectValue placeholder={groupsLoading ? "Loading..." : "Select Group"} />
@@ -320,10 +315,10 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.group_id && <p className="text-red-500">{methods.formState.errors.group_id.message}</p>}
+                  {methods.formState.errors.group_id && <p className="text-sm text-red-500">{methods.formState.errors.group_id.message}</p>}
                 </div>
                 <div>
-                  <label htmlFor="subject_id">Subject</label>
+                  <label htmlFor="subject_id" className="block text-sm font-medium text-gray-700">Subject</label>
                   <Select onValueChange={(value) => methods.setValue('subject_id', value)} disabled={!groupId || subjectsLoading}>
                     <SelectTrigger id="subject_id">
                       <SelectValue placeholder={subjectsLoading ? "Loading..." : "Select Subject"} />
@@ -336,10 +331,10 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.subject_id && <p className="text-red-500">{methods.formState.errors.subject_id.message}</p>}
+                  {methods.formState.errors.subject_id && <p className="text-sm text-red-500">{methods.formState.errors.subject_id.message}</p>}
                 </div>
                 <div>
-                  <label htmlFor="chapter_id">Chapter</label>
+                  <label htmlFor="chapter_id" className="block text-sm font-medium text-gray-700">Chapter</label>
                   <Select onValueChange={(value) => methods.setValue('chapter_id', value)} disabled={!subjectId || chaptersLoading}>
                     <SelectTrigger id="chapter_id">
                       <SelectValue placeholder={chaptersLoading ? "Loading..." : "Select Chapter"} />
@@ -352,10 +347,10 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.chapter_id && <p className="text-red-500">{methods.formState.errors.chapter_id.message}</p>}
+                  {methods.formState.errors.chapter_id && <p className="text-sm text-red-500">{methods.formState.errors.chapter_id.message}</p>}
                 </div>
                 <div>
-                  <label htmlFor="topic_id">Topic</label>
+                  <label htmlFor="topic_id" className="block text-sm font-medium text-gray-700">Topic</label>
                   <Select onValueChange={(value) => methods.setValue('topic_id', value)} disabled={!chapterId || topicsLoading}>
                     <SelectTrigger id="topic_id">
                       <SelectValue placeholder={topicsLoading ? "Loading..." : "Select Topic"} />
@@ -368,14 +363,14 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.topic_id && <p className="text-red-500">{methods.formState.errors.topic_id.message}</p>}
+                  {methods.formState.errors.topic_id && <p className="text-sm text-red-500">{methods.formState.errors.topic_id.message}</p>}
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <div className="space-y-8">
-            {fields.map((field, index) => (
+            {isMounted && fields.map((field, index) => (
               <Card key={field.id} className="p-4">
                 <CardHeader>
                   <div className="flex justify-between items-center">
@@ -385,55 +380,78 @@ export default function CreateQuizPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label htmlFor={`questions.${index}.question`}>Question</label>
+                    <label htmlFor={`questions.${index}.question`} className="block text-sm font-medium text-gray-700">Question</label>
                     <QuillEditor
                       content={methods.watch(`questions.${index}.question`)}
                       onUpdate={(value) => methods.setValue(`questions.${index}.question`, value)}
                     />
-                    {methods.formState.errors.questions?.[index]?.question && <p className="text-red-500">{methods.formState.errors.questions[index].question.message}</p>}
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label htmlFor={`questions.${index}.question_image_url`}>Question Image</label>
-                      <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_image_url`, filePath)} />
-                    </div>
-                    <div>
-                      <label htmlFor={`questions.${index}.question_video_url`}>Question Video</label>
-                      <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_video_url`, filePath)} />
-                    </div>
-                    <div>
-                      <label htmlFor={`questions.${index}.question_audio_url`}>Question Audio</label>
-                      <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_audio_url`, filePath)} />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor={`questions.${index}.difficulty`}>Difficulty</label>
-                      <Select onValueChange={(value) => methods.setValue(`questions.${index}.difficulty`, value)}>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Question Media</label>
+                    <div className="flex items-center space-x-2">
+                      <Select onValueChange={(value) => methods.setValue(`questions.${index}.question_media_type`, value)}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select Difficulty" />
+                          <SelectValue placeholder="Select Media Type" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Easy">Easy</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="Hard">Hard</SelectItem>
+                          <SelectItem value="link">Link</SelectItem>
+                          <SelectItem value="file">File</SelectItem>
                         </SelectContent>
                       </Select>
-                      {methods.formState.errors.questions?.[index]?.difficulty && <p className="text-red-500">{methods.formState.errors.questions[index].difficulty.message}</p>}
-                    </div>
-                    <div>
-                      <label htmlFor={`questions.${index}.reference`}>Reference</label>
-                      <QuillEditor
-                        content={methods.watch(`questions.${index}.reference`)}
-                        onUpdate={(value) => methods.setValue(`questions.${index}.reference`, value)}
-                      />
-                      {methods.formState.errors.questions?.[index]?.reference && <p className="text-red-500">{methods.formState.errors.questions[index].reference.message}</p>}
+                      {methods.watch(`questions.${index}.question_media_type`) === 'link' && (
+                        <Input {...methods.register(`questions.${index}.question_media_link`)} placeholder="Media Link" />
+                      )}
+                      {methods.watch(`questions.${index}.question_media_type`) === 'file' && (
+                        <Input type="file" {...methods.register(`questions.${index}.question_media_file`)} />
+                      )}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium">Options</h3>
-                    <OptionsFieldArray nestIndex={index} />
-                    {methods.formState.errors.questions?.[index]?.options && <p className="text-red-500">{methods.formState.errors.questions[index].options.message}</p>}
+                    <label htmlFor={`questions.${index}.answer`} className="block text-sm font-medium text-gray-700">Answer</label>
+                    <QuillEditor
+                      content={methods.watch(`questions.${index}.answer`)}
+                      onUpdate={(value) => methods.setValue(`questions.${index}.answer`, value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Answer Media</label>
+                    <div className="flex items-center space-x-2">
+                      <Select onValueChange={(value) => methods.setValue(`questions.${index}.answer_media_type`, value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Media Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="link">Link</SelectItem>
+                          <SelectItem value="file">File</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {methods.watch(`questions.${index}.answer_media_type`) === 'link' && (
+                        <Input {...methods.register(`questions.${index}.answer_media_link`)} placeholder="Media Link" />
+                      )}
+                      {methods.watch(`questions.${index}.answer_media_type`) === 'file' && (
+                        <Input type="file" {...methods.register(`questions.${index}.answer_media_file`)} />
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor={`questions.${index}.explanation`} className="block text-sm font-medium text-gray-700">Explanation</label>
+                    <QuillEditor
+                      content={methods.watch(`questions.${index}.explanation`)}
+                      onUpdate={(value) => methods.setValue(`questions.${index}.explanation`, value)}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor={`questions.${index}.difficulty`} className="block text-sm font-medium text-gray-700">Difficulty</label>
+                    <Select onValueChange={(value) => methods.setValue(`questions.${index}.difficulty`, value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Difficulty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Easy">Easy</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="Hard">Hard</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </CardContent>
               </Card>
@@ -441,10 +459,10 @@ export default function CreateQuizPage() {
           </div>
 
           <div className="flex justify-between">
-            <Button type="button" variant="secondary" onClick={() => append({ question: '', difficulty: '', reference: '', options: [], correctAnswerIndex: '-1' })}>
+            {isMounted && <Button type="button" variant="secondary" onClick={() => append({ question: '', answer: '' })}>
               Add Question
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating MCQs...' : 'Create MCQs'}</Button>
+            </Button>}
+            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating SAQ...' : 'Create SAQ'}</Button>
           </div>
         </form>
       </div>
