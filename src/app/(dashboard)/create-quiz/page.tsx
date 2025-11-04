@@ -35,6 +35,14 @@ const formSchema = z.object({
   topic_id: z.string().min(1, { message: "Topic is required" }),
   questions: z.array(z.object({
     question: z.string().min(1, { message: "Question is required" }),
+    question_image_type: z.enum(["link", "file"]).optional(),
+    question_image_link: z.string().optional(),
+    question_image_url: z.string().optional(),
+    question_video_type: z.enum(["link", "file"]).optional(),
+    question_video_link: z.string().optional(),
+    question_video_url: z.string().optional(),
+    question_audio_type: z.enum(["link", "file"]).optional(),
+    question_audio_link: z.string().optional(),
     question_image_url: z.string().optional(),
     question_video_url: z.string().optional(),
     question_audio_url: z.string().optional(),
@@ -53,6 +61,26 @@ const formSchema = z.object({
       audio_link: z.string().optional(),
       audio_file: z.any().optional(),
     })).min(2, { message: "At least two options are required" }),
+    explanation: z.string().optional(),
+    explanation_image_type: z.enum(["link", "file"]).optional(),
+    explanation_image_link: z.string().optional(),
+    explanation_image_url: z.string().optional(),
+    explanation_video_type: z.enum(["link", "file"]).optional(),
+    explanation_video_link: z.string().optional(),
+    explanation_video_url: z.string().optional(),
+    explanation_audio_type: z.enum(["link", "file"]).optional(),
+    explanation_audio_link: z.string().optional(),
+    explanation_audio_url: z.string().optional(),
+    hint: z.string().optional(),
+    hint_image_type: z.enum(["link", "file"]).optional(),
+    hint_image_link: z.string().optional(),
+    hint_image_url: z.string().optional(),
+    hint_video_type: z.enum(["link", "file"]).optional(),
+    hint_video_link: z.string().optional(),
+    hint_video_url: z.string().optional(),
+    hint_audio_type: z.enum(["link", "file"]).optional(),
+    hint_audio_link: z.string().optional(),
+    hint_audio_url: z.string().optional(),
   })).min(1, { message: "At least one question is required" })
 });
 
@@ -246,12 +274,26 @@ export default function CreateQuizPage() {
         const transformedQuestion = {
           topic_id: data.topic_id,
           question_text: q.question,
+          question_image_url: q.question_image_type === 'link' ? q.question_image_link : q.question_image_url,
+          question_video_url: q.question_video_type === 'link' ? q.question_video_link : q.question_video_url,
+          question_audio_url: q.question_audio_type === 'link' ? q.question_audio_link : q.question_audio_url,
           difficulty_level: q.difficulty,
           reference: q.reference,
           options: q.options.map((opt: any, index: number) => ({
             option_text: opt.text,
             is_correct: index.toString() === q.correctAnswerIndex,
+            option_image_url: opt.image_type === 'link' ? opt.image_link : opt.image_file,
+            option_video_url: opt.video_type === 'link' ? opt.video_link : opt.video_file,
+            option_audio_url: opt.audio_type === 'link' ? opt.audio_link : opt.audio_file,
           })),
+          explanation: q.explanation,
+          explanation_image_url: q.explanation_image_type === 'link' ? q.explanation_image_link : q.explanation_image_url,
+          explanation_video_url: q.explanation_video_type === 'link' ? q.explanation_video_link : q.explanation_video_url,
+          explanation_audio_url: q.explanation_audio_type === 'link' ? q.explanation_audio_link : q.explanation_audio_url,
+          hint: q.hint,
+          hint_image_url: q.hint_image_type === 'link' ? q.hint_image_link : q.hint_image_url,
+          hint_video_url: q.hint_video_type === 'link' ? q.hint_video_link : q.hint_video_url,
+          hint_audio_url: q.hint_audio_type === 'link' ? q.hint_audio_link : q.hint_audio_url,
         };
         await axios.post('http://localhost:9000/api/questions', transformedQuestion);
       }
@@ -276,25 +318,49 @@ export default function CreateQuizPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label htmlFor="program_id">Program</label>
-                  <Select onValueChange={(value) => methods.setValue('program_id', value)}>
+                  <Select
+                    onValueChange={(value) =>
+                      methods.setValue("program_id", value)
+                    }
+                  >
                     <SelectTrigger id="program_id">
-                      <SelectValue placeholder={programsLoading ? "Loading..." : "Select Program"} />
+                      <SelectValue
+                        placeholder={
+                          programsLoading ? "Loading..." : "Select Program"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {programs.map((program: any) => (
-                        <SelectItem key={program.id} value={program.id.toString()}>
+                        <SelectItem
+                          key={program.id}
+                          value={program.id.toString()}
+                        >
                           {program.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.program_id && <p className="text-red-500">{methods.formState.errors.program_id.message}</p>}
+                  {methods.formState.errors.program_id && (
+                    <p className="text-red-500">
+                      {methods.formState.errors.program_id.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="class_id">Class</label>
-                  <Select onValueChange={(value) => methods.setValue('class_id', value)} disabled={!programId || classesLoading}>
+                  <Select
+                    onValueChange={(value) =>
+                      methods.setValue("class_id", value)
+                    }
+                    disabled={!programId || classesLoading}
+                  >
                     <SelectTrigger id="class_id">
-                      <SelectValue placeholder={classesLoading ? "Loading..." : "Select Class"} />
+                      <SelectValue
+                        placeholder={
+                          classesLoading ? "Loading..." : "Select Class"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {classes.map((c: any) => (
@@ -304,13 +370,26 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.class_id && <p className="text-red-500">{methods.formState.errors.class_id.message}</p>}
+                  {methods.formState.errors.class_id && (
+                    <p className="text-red-500">
+                      {methods.formState.errors.class_id.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="group_id">Group</label>
-                  <Select onValueChange={(value) => methods.setValue('group_id', value)} disabled={!classId || groupsLoading}>
+                  <Select
+                    onValueChange={(value) =>
+                      methods.setValue("group_id", value)
+                    }
+                    disabled={!classId || groupsLoading}
+                  >
                     <SelectTrigger id="group_id">
-                      <SelectValue placeholder={groupsLoading ? "Loading..." : "Select Group"} />
+                      <SelectValue
+                        placeholder={
+                          groupsLoading ? "Loading..." : "Select Group"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {groups.map((group: any) => (
@@ -320,45 +399,90 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.group_id && <p className="text-red-500">{methods.formState.errors.group_id.message}</p>}
+                  {methods.formState.errors.group_id && (
+                    <p className="text-red-500">
+                      {methods.formState.errors.group_id.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="subject_id">Subject</label>
-                  <Select onValueChange={(value) => methods.setValue('subject_id', value)} disabled={!groupId || subjectsLoading}>
+                  <Select
+                    onValueChange={(value) =>
+                      methods.setValue("subject_id", value)
+                    }
+                    disabled={!groupId || subjectsLoading}
+                  >
                     <SelectTrigger id="subject_id">
-                      <SelectValue placeholder={subjectsLoading ? "Loading..." : "Select Subject"} />
+                      <SelectValue
+                        placeholder={
+                          subjectsLoading ? "Loading..." : "Select Subject"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {subjects.map((subject: any) => (
-                        <SelectItem key={subject.id} value={subject.id.toString()}>
+                        <SelectItem
+                          key={subject.id}
+                          value={subject.id.toString()}
+                        >
                           {subject.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.subject_id && <p className="text-red-500">{methods.formState.errors.subject_id.message}</p>}
+                  {methods.formState.errors.subject_id && (
+                    <p className="text-red-500">
+                      {methods.formState.errors.subject_id.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="chapter_id">Chapter</label>
-                  <Select onValueChange={(value) => methods.setValue('chapter_id', value)} disabled={!subjectId || chaptersLoading}>
+                  <Select
+                    onValueChange={(value) =>
+                      methods.setValue("chapter_id", value)
+                    }
+                    disabled={!subjectId || chaptersLoading}
+                  >
                     <SelectTrigger id="chapter_id">
-                      <SelectValue placeholder={chaptersLoading ? "Loading..." : "Select Chapter"} />
+                      <SelectValue
+                        placeholder={
+                          chaptersLoading ? "Loading..." : "Select Chapter"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {chapters.map((chapter: any) => (
-                        <SelectItem key={chapter.id} value={chapter.id.toString()}>
+                        <SelectItem
+                          key={chapter.id}
+                          value={chapter.id.toString()}
+                        >
                           {chapter.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.chapter_id && <p className="text-red-500">{methods.formState.errors.chapter_id.message}</p>}
+                  {methods.formState.errors.chapter_id && (
+                    <p className="text-red-500">
+                      {methods.formState.errors.chapter_id.message}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label htmlFor="topic_id">Topic</label>
-                  <Select onValueChange={(value) => methods.setValue('topic_id', value)} disabled={!chapterId || topicsLoading}>
+                  <Select
+                    onValueChange={(value) =>
+                      methods.setValue("topic_id", value)
+                    }
+                    disabled={!chapterId || topicsLoading}
+                  >
                     <SelectTrigger id="topic_id">
-                      <SelectValue placeholder={topicsLoading ? "Loading..." : "Select Topic"} />
+                      <SelectValue
+                        placeholder={
+                          topicsLoading ? "Loading..." : "Select Topic"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {topics.map((topic: any) => (
@@ -368,7 +492,11 @@ export default function CreateQuizPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {methods.formState.errors.topic_id && <p className="text-red-500">{methods.formState.errors.topic_id.message}</p>}
+                  {methods.formState.errors.topic_id && (
+                    <p className="text-red-500">
+                      {methods.formState.errors.topic_id.message}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -380,36 +508,110 @@ export default function CreateQuizPage() {
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <CardTitle>Question {index + 1}</CardTitle>
-                    <Button type="button" variant="destructive" onClick={() => remove(index)}>Remove Question</Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => remove(index)}
+                    >
+                      Remove Question
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <label htmlFor={`questions.${index}.question`}>Question</label>
+                    <label htmlFor={`questions.${index}.question`}>
+                      Question
+                    </label>
                     <QuillEditor
                       content={methods.watch(`questions.${index}.question`)}
-                      onUpdate={(value) => methods.setValue(`questions.${index}.question`, value)}
+                      onUpdate={(value) =>
+                        methods.setValue(`questions.${index}.question`, value)
+                      }
                     />
-                    {methods.formState.errors.questions?.[index]?.question && <p className="text-red-500">{methods.formState.errors.questions[index].question.message}</p>}
+                    {methods.formState.errors.questions?.[index]?.question && (
+                      <p className="text-red-500">
+                        {
+                          methods.formState.errors.questions[index].question
+                            .message
+                        }
+                      </p>
+                    )}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label htmlFor={`questions.${index}.question_image_url`}>Question Image</label>
-                      <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_image_url`, filePath)} />
+                      <label>Question Image</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.question_image_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.question_image_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.question_image_link`)} placeholder="Image Link" />
+                        )}
+                        {methods.watch(`questions.${index}.question_image_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_image_url`, filePath)} />
+                        )}
+                      </div>
                     </div>
                     <div>
-                      <label htmlFor={`questions.${index}.question_video_url`}>Question Video</label>
-                      <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_video_url`, filePath)} />
+                      <label>Question Video</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.question_video_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.question_video_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.question_video_link`)} placeholder="Video Link" />
+                        )}
+                        {methods.watch(`questions.${index}.question_video_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_video_url`, filePath)} />
+                        )}
+                      </div>
                     </div>
                     <div>
-                      <label htmlFor={`questions.${index}.question_audio_url`}>Question Audio</label>
-                      <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_audio_url`, filePath)} />
+                      <label>Question Audio</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.question_audio_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.question_audio_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.question_audio_link`)} placeholder="Audio Link" />
+                        )}
+                        {methods.watch(`questions.${index}.question_audio_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_audio_url`, filePath)} />
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor={`questions.${index}.difficulty`}>Difficulty</label>
-                      <Select onValueChange={(value) => methods.setValue(`questions.${index}.difficulty`, value)}>
+                      <label htmlFor={`questions.${index}.difficulty`}>
+                        Difficulty
+                      </label>
+                      <Select
+                        onValueChange={(value) =>
+                          methods.setValue(
+                            `questions.${index}.difficulty`,
+                            value
+                          )
+                        }
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="Select Difficulty" />
                         </SelectTrigger>
@@ -419,32 +621,226 @@ export default function CreateQuizPage() {
                           <SelectItem value="Hard">Hard</SelectItem>
                         </SelectContent>
                       </Select>
-                      {methods.formState.errors.questions?.[index]?.difficulty && <p className="text-red-500">{methods.formState.errors.questions[index].difficulty.message}</p>}
+                      {methods.formState.errors.questions?.[index]
+                        ?.difficulty && (
+                        <p className="text-red-500">
+                          {
+                            methods.formState.errors.questions[index].difficulty
+                              .message
+                          }
+                        </p>
+                      )}
                     </div>
                     <div>
-                      <label htmlFor={`questions.${index}.reference`}>Reference</label>
+                      <label htmlFor={`questions.${index}.reference`}>
+                        Reference
+                      </label>
                       <QuillEditor
                         content={methods.watch(`questions.${index}.reference`)}
-                        onUpdate={(value) => methods.setValue(`questions.${index}.reference`, value)}
+                        onUpdate={(value) =>
+                          methods.setValue(
+                            `questions.${index}.reference`,
+                            value
+                          )
+                        }
                       />
-                      {methods.formState.errors.questions?.[index]?.reference && <p className="text-red-500">{methods.formState.errors.questions[index].reference.message}</p>}
+                      {methods.formState.errors.questions?.[index]
+                        ?.reference && (
+                        <p className="text-red-500">
+                          {
+                            methods.formState.errors.questions[index].reference
+                              .message
+                          }
+                        </p>
+                      )}
                     </div>
                   </div>
                   <div>
                     <h3 className="text-lg font-medium">Options</h3>
                     <OptionsFieldArray nestIndex={index} />
-                    {methods.formState.errors.questions?.[index]?.options && <p className="text-red-500">{methods.formState.errors.questions[index].options.message}</p>}
+                    {methods.formState.errors.questions?.[index]?.options && (
+                      <p className="text-red-500">
+                        {
+                          methods.formState.errors.questions[index].options
+                            .message
+                        }
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label htmlFor={`questions.${index}.explanation`}>
+                      Explanation
+                    </label>
+                    <QuillEditor
+                      content={methods.watch(`questions.${index}.explanation`)}
+                      onUpdate={(value) =>
+                        methods.setValue(
+                          `questions.${index}.explanation`,
+                          value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label>Explanation Image</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.explanation_image_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.explanation_image_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.explanation_image_link`)} placeholder="Image Link" />
+                        )}
+                        {methods.watch(`questions.${index}.explanation_image_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.explanation_image_url`, filePath)} />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label>Explanation Video</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.explanation_video_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.explanation_video_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.explanation_video_link`)} placeholder="Video Link" />
+                        )}
+                        {methods.watch(`questions.${index}.explanation_video_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.explanation_video_url`, filePath)} />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label>Explanation Audio</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.explanation_audio_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.explanation_audio_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.explanation_audio_link`)} placeholder="Audio Link" />
+                        )}
+                        {methods.watch(`questions.${index}.explanation_audio_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.explanation_audio_url`, filePath)} />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor={`questions.${index}.hint`}>Hint</label>
+                    <QuillEditor
+                      content={methods.watch(`questions.${index}.hint`)}
+                      onUpdate={(value) =>
+                        methods.setValue(`questions.${index}.hint`, value)
+                      }
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label>Hint Image</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.hint_image_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.hint_image_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.hint_image_link`)} placeholder="Image Link" />
+                        )}
+                        {methods.watch(`questions.${index}.hint_image_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.hint_image_url`, filePath)} />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label>Hint Video</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.hint_video_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.hint_video_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.hint_video_link`)} placeholder="Video Link" />
+                        )}
+                        {methods.watch(`questions.${index}.hint_video_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.hint_video_url`, filePath)} />
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label>Hint Audio</label>
+                      <div className="flex items-center space-x-2">
+                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.hint_audio_type`, value)}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select Type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="link">Link</SelectItem>
+                            <SelectItem value="file">File</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {methods.watch(`questions.${index}.hint_audio_type`) === 'link' && (
+                          <Input {...methods.register(`questions.${index}.hint_audio_link`)} placeholder="Audio Link" />
+                        )}
+                        {methods.watch(`questions.${index}.hint_audio_type`) === 'file' && (
+                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.hint_audio_url`, filePath)} />
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-
           <div className="flex justify-between">
-            <Button type="button" variant="secondary" onClick={() => append({ question: '', difficulty: '', reference: '', options: [], correctAnswerIndex: '-1' })}>
+            {/* This is the "Add Question" button */}
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                append({
+                  question: "",
+                  difficulty: "",
+                  reference: "",
+                  options: [], // Your OptionsFieldArray will handle adding items here
+                  correctAnswerIndex: "-1",
+                  explanation: "",
+                  hint: "",
+                })
+              }
+            >
               Add Question
             </Button>
-            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating MCQs...' : 'Create MCQs'}</Button>
+            {/* This is the "Submit" button */}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Creating MCQs..." : "Create MCQs"}
+            </Button>
           </div>
         </form>
       </div>

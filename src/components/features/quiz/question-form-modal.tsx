@@ -19,6 +19,7 @@ interface Question {
   options?: string[]; // For MCQ
   correctAnswerIndex?: number; // For MCQ
   explanation?: string;
+  hint?: string;
   sub_questions?: { question_text: string; answer_text: string }[]; // For CQ
 }
 
@@ -35,6 +36,7 @@ export function QuestionFormModal({ isOpen, onClose, onSave, initialQuestion, qu
   const [options, setOptions] = useState<string[]>(['', '', '', '']);
   const [correctAnswerIndex, setCorrectAnswerIndex] = useState<number | null>(null);
   const [explanation, setExplanation] = useState('');
+  const [hint, setHint] = useState('');
   const [uddipok, setUddipok] = useState('');
   const [subQuestions, setSubQuestions] = useState([{ question_text: '', answer_text: '' }]);
 
@@ -48,6 +50,7 @@ export function QuestionFormModal({ isOpen, onClose, onSave, initialQuestion, qu
             setOptions(initialQuestion.options.length ? initialQuestion.options : ['', '', '', '']);
             setCorrectAnswerIndex(initialQuestion.correctAnswerIndex);
             setExplanation(initialQuestion.explanation);
+            setHint(initialQuestion.hint);
         }
     } else {
       // Reset form for new question
@@ -55,6 +58,7 @@ export function QuestionFormModal({ isOpen, onClose, onSave, initialQuestion, qu
       setOptions(['', '', '', '']);
       setCorrectAnswerIndex(null);
       setExplanation('');
+      setHint('');
       setUddipok('');
       setSubQuestions([{ question_text: '', answer_text: '' }]);
     }
@@ -106,6 +110,7 @@ export function QuestionFormModal({ isOpen, onClose, onSave, initialQuestion, qu
             options: quizType === 'mcq' ? options : [],
             correctAnswerIndex: quizType === 'mcq' ? (correctAnswerIndex ?? 0) : -1,
             explanation,
+            hint,
         };
     }
     onSave(questionData);
@@ -145,6 +150,10 @@ export function QuestionFormModal({ isOpen, onClose, onSave, initialQuestion, qu
         <div>
             <Label className="font-semibold">Explanation</Label>
             <TiptapEditor content={explanation} onUpdate={setExplanation} />
+        </div>
+        <div>
+            <Label className="font-semibold">Hint</Label>
+            <TiptapEditor content={hint} onUpdate={setHint} />
         </div>
     </>
   );

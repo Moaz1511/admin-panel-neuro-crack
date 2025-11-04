@@ -3,15 +3,29 @@
 "use client";
 
 import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css'; // Add css for snow theme
+import 'quill/dist/quill.snow.css';
 import { useEffect } from 'react';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+// THIS IS THE ONLY SETUP NEEDED
+if (typeof window !== 'undefined') {
+  window.katex = katex;
+}
 
 interface QuillViewerProps {
   content: string;
 }
 
 const QuillViewer: React.FC<QuillViewerProps> = ({ content }) => {
-  const { quill, quillRef } = useQuill({ modules: { toolbar: false } });
+  const { quill, quillRef } = useQuill({ 
+    modules: { 
+      toolbar: false,
+      formula: true // This will now work
+    },
+    formats: ['formula'],
+    readOnly: true
+  });
 
   useEffect(() => {
     if (quill) {
@@ -21,7 +35,7 @@ const QuillViewer: React.FC<QuillViewerProps> = ({ content }) => {
   }, [quill, content]);
 
   return (
-    <div style={{ width: '100%', minHeight: 150 }}>
+    <div style={{ width: '100%' }}>
       <div ref={quillRef} />
     </div>
   );
