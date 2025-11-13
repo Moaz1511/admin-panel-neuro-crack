@@ -58,6 +58,16 @@ export const AcsQuizService = {
     }
   },
 
+  getAllGroups: async (): Promise<Group[]> => {
+    try {
+      const response = await axios.get(`${ApiEndpoints.groups.getAll}`)
+      return response.data.data || []
+    } catch (error) {
+      console.error('Error fetching groups:', error)
+      throw error
+    }
+  },
+
   getGroupsByClass: async (classId: number): Promise<Group[]> => {
     try {
       const response = await axios.get(`${ApiEndpoints.groups.getByClassId}${classId}`)

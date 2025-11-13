@@ -32,7 +32,7 @@ export function OptionsFieldArray({ nestIndex }: { nestIndex: number }) {
                     <RadioGroupItem value={k.toString()} />
                     <div className="flex-grow">
                       <QuillEditor
-                        content={watch(`questions.${nestIndex}.options.${k}.text`)}
+                        content={watch(`questions.${nestIndex}.options.${k}.text`) as string}
                         onUpdate={(value) => setValue(`questions.${nestIndex}.options.${k}.text`, value)}
                       />
                     </div>
@@ -42,7 +42,7 @@ export function OptionsFieldArray({ nestIndex }: { nestIndex: number }) {
                     <div>
                       <label>Image</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => setValue(`questions.${nestIndex}.options.${k}.image_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => setValue(`questions.${nestIndex}.options.${k}.image_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -62,7 +62,7 @@ export function OptionsFieldArray({ nestIndex }: { nestIndex: number }) {
                     <div>
                       <label>Video</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => setValue(`questions.${nestIndex}.options.${k}.video_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => setValue(`questions.${nestIndex}.options.${k}.video_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -82,7 +82,7 @@ export function OptionsFieldArray({ nestIndex }: { nestIndex: number }) {
                     <div>
                       <label>Audio</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => setValue(`questions.${nestIndex}.options.${k}.audio_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => setValue(`questions.${nestIndex}.options.${k}.audio_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>

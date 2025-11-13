@@ -8,7 +8,7 @@ import { FileUpload } from '@/components/ui/file-upload';
 import axios from 'axios';
 
 export default function UploadQuizPage() {
-  const [file, setFile] = useState(null);
+  const [file, setFile] = useState<File | null>(null);
   const [googleSheetLink, setGoogleSheetLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 

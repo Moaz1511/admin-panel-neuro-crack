@@ -43,6 +43,8 @@ const formSchema = z.object({
   })).min(1, { message: "At least one CQ is required" })
 });
 
+type CqData = z.infer<typeof formSchema>;
+
 export default function CreateCqPage() {
   const [programs, setPrograms] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -229,7 +231,7 @@ export default function CreateCqPage() {
     fetchTopics();
   }, [chapterId]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: CqData) => {
     console.log('Submitting data:', data);
     setIsSubmitting(true);
 
@@ -386,7 +388,7 @@ export default function CreateCqPage() {
                   <div>
                     <label htmlFor={`cqs.${index}.uddipok`} className="block text-sm font-medium text-gray-700">Uddipok (Stimulus)</label>
                     <QuillEditor
-                      content={methods.watch(`cqs.${index}.uddipok`)}
+                      content={methods.watch(`cqs.${index}.uddipok`) as string}
                       onUpdate={(value) => methods.setValue(`cqs.${index}.uddipok`, value)}
                     />
                   </div>
@@ -394,7 +396,7 @@ export default function CreateCqPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Uddipok Media</label>
                     <div className="flex items-center space-x-2">
-                      <Select onValueChange={(value) => methods.setValue(`cqs.${index}.uddipok_media_type`, value)}>
+                      <Select onValueChange={(value: "link" | "file") => methods.setValue(`cqs.${index}.uddipok_media_type`, value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Media Type" />
                         </SelectTrigger>
@@ -414,7 +416,7 @@ export default function CreateCqPage() {
 
                   <div>
                     <label htmlFor={`cqs.${index}.difficulty`} className="block text-sm font-medium text-gray-700">Difficulty</label>
-                    <Select onValueChange={(value) => methods.setValue(`cqs.${index}.difficulty`, value)}>
+                    <Select onValueChange={(value: "Easy" | "Medium" | "Hard") => methods.setValue(`cqs.${index}.difficulty`, value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select Difficulty" />
                       </SelectTrigger>
@@ -429,7 +431,7 @@ export default function CreateCqPage() {
                   <div>
                     <label htmlFor={`cqs.${index}.reference`} className="block text-sm font-medium text-gray-700">Reference</label>
                     <QuillEditor
-                      content={methods.watch(`cqs.${index}.reference`)}
+                      content={methods.watch(`cqs.${index}.reference`) as string}
                       onUpdate={(value) => methods.setValue(`cqs.${index}.reference`, value)}
                     />
                   </div>
@@ -451,7 +453,7 @@ export default function CreateCqPage() {
   );
 }
 
-function SubQuestions({ cqIndex }) {
+function SubQuestions({ cqIndex }: { cqIndex: number }) {
   const { control, watch, setValue, register } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
@@ -470,14 +472,14 @@ function SubQuestions({ cqIndex }) {
           <div>
             <label htmlFor={`cqs.${cqIndex}.sub_questions.${index}.question`} className="block text-sm font-medium text-gray-700">Question</label>
             <QuillEditor
-              content={watch(`cqs.${cqIndex}.sub_questions.${index}.question`)}
+              content={watch(`cqs.${cqIndex}.sub_questions.${index}.question`) as string}
               onUpdate={(value) => setValue(`cqs.${cqIndex}.sub_questions.${index}.question`, value)}
             />
           </div>
           <div>
             <label htmlFor={`cqs.${cqIndex}.sub_questions.${index}.answer`} className="block text-sm font-medium text-gray-700">Answer</label>
             <QuillEditor
-              content={watch(`cqs.${cqIndex}.sub_questions.${index}.answer`)}
+              content={watch(`cqs.${cqIndex}.sub_questions.${index}.answer`) as string}
               onUpdate={(value) => setValue(`cqs.${cqIndex}.sub_questions.${index}.answer`, value)}
             />
           </div>

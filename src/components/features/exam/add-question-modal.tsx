@@ -70,19 +70,22 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQues
 
   // 💡 Memoize filtered questions for performance
   const filteredMcqs = useMemo(() =>
-    availableQuestions.mcq.filter(q =>
-      q.question_text?.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [availableQuestions.mcq, searchTerm]);
+    availableQuestions.mcq.filter(q => {
+      if (q.type !== 'mcq') return false;
+      return q.question_text?.toLowerCase().includes(searchTerm.toLowerCase());
+    }), [availableQuestions.mcq, searchTerm]);
 
   const filteredCqs = useMemo(() =>
-    availableQuestions.cq.filter(q =>
-      q.uddipok?.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [availableQuestions.cq, searchTerm]);
+    availableQuestions.cq.filter(q => {
+      if (q.type !== 'cq') return false;
+      return q.uddipok?.toLowerCase().includes(searchTerm.toLowerCase());
+    }), [availableQuestions.cq, searchTerm]);
   
   const filteredSaqs = useMemo(() =>
-    availableQuestions.saq.filter(q =>
-      q.question_text?.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [availableQuestions.saq, searchTerm]);
+    availableQuestions.saq.filter(q => {
+      if (q.type !== 'saq') return false;
+      return q.question_text?.toLowerCase().includes(searchTerm.toLowerCase());
+    }), [availableQuestions.saq, searchTerm]);
 
   const handleAdd = () => {
     onAdd(Object.values(selectedToAdd));

@@ -43,8 +43,6 @@ const formSchema = z.object({
     question_video_url: z.string().optional(),
     question_audio_type: z.enum(["link", "file"]).optional(),
     question_audio_link: z.string().optional(),
-    question_image_url: z.string().optional(),
-    question_video_url: z.string().optional(),
     question_audio_url: z.string().optional(),
     difficulty: z.string().min(1, { message: "Difficulty is required" }),
     reference: z.string().min(1, { message: "Reference is required" }),
@@ -523,7 +521,7 @@ export default function CreateQuizPage() {
                       Question
                     </label>
                     <QuillEditor
-                      content={methods.watch(`questions.${index}.question`)}
+                      content={methods.watch(`questions.${index}.question`) as string}
                       onUpdate={(value) =>
                         methods.setValue(`questions.${index}.question`, value)
                       }
@@ -541,7 +539,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Question Image</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.question_image_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.question_image_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -561,7 +559,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Question Video</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.question_video_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.question_video_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -581,7 +579,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Question Audio</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.question_audio_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.question_audio_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -636,7 +634,7 @@ export default function CreateQuizPage() {
                         Reference
                       </label>
                       <QuillEditor
-                        content={methods.watch(`questions.${index}.reference`)}
+                        content={methods.watch(`questions.${index}.reference`) as string}
                         onUpdate={(value) =>
                           methods.setValue(
                             `questions.${index}.reference`,
@@ -672,7 +670,7 @@ export default function CreateQuizPage() {
                       Explanation
                     </label>
                     <QuillEditor
-                      content={methods.watch(`questions.${index}.explanation`)}
+                      content={methods.watch(`questions.${index}.explanation`) as string}
                       onUpdate={(value) =>
                         methods.setValue(
                           `questions.${index}.explanation`,
@@ -685,7 +683,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Explanation Image</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.explanation_image_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.explanation_image_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -705,7 +703,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Explanation Video</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.explanation_video_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.explanation_video_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -725,7 +723,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Explanation Audio</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.explanation_audio_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.explanation_audio_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -746,7 +744,7 @@ export default function CreateQuizPage() {
                   <div>
                     <label htmlFor={`questions.${index}.hint`}>Hint</label>
                     <QuillEditor
-                      content={methods.watch(`questions.${index}.hint`)}
+                      content={methods.watch(`questions.${index}.hint`) as string}
                       onUpdate={(value) =>
                         methods.setValue(`questions.${index}.hint`, value)
                       }
@@ -756,7 +754,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Hint Image</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.hint_image_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.hint_image_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -776,7 +774,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Hint Video</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.hint_video_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.hint_video_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>
@@ -796,7 +794,7 @@ export default function CreateQuizPage() {
                     <div>
                       <label>Hint Audio</label>
                       <div className="flex items-center space-x-2">
-                        <Select onValueChange={(value) => methods.setValue(`questions.${index}.hint_audio_type`, value)}>
+                        <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.hint_audio_type`, value)}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select Type" />
                           </SelectTrigger>

@@ -10,7 +10,7 @@ import 'katex/dist/katex.min.css';
 
 // THIS IS THE ONLY SETUP NEEDED
 if (typeof window !== 'undefined') {
-  window.katex = katex;
+  (window as any).katex = katex;
 }
 
 interface QuillViewerProps {

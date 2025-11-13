@@ -3,6 +3,7 @@
 "use client";
 
 import { useEditor, EditorContent } from "@tiptap/react";
+import { useEffect } from 'react';
 import StarterKit from "@tiptap/starter-kit";
 import Image from '@tiptap/extension-image';
 import { Node } from '@tiptap/core';
@@ -15,8 +16,17 @@ const MathNode = Node.create({
   group: 'inline',
   inline: true,
   atom: true,
-  toDOM: () => ['span', { 'data-type': 'math-node' }, 0],
+  addAttributes() {
+    return {
+      'data-type': {
+        default: 'math-node',
+      },
+    };
+  },
   parseHTML: () => [{ tag: 'span[data-type="math-node"]' }],
+  renderHTML({ HTMLAttributes }) {
+    return ['span', HTMLAttributes, 0];
+  },
 });
 
 interface TiptapViewerProps {

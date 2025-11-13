@@ -43,6 +43,8 @@ const formSchema = z.object({
   })).min(1, { message: "At least one question is required" })
 });
 
+type SaqData = z.infer<typeof formSchema>;
+
 export default function CreateSaqPage() {
   const [programs, setPrograms] = useState([]);
   const [classes, setClasses] = useState([]);
@@ -230,7 +232,7 @@ export default function CreateSaqPage() {
     fetchTopics();
   }, [chapterId]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: SaqData) => {
     console.log('Submitting data:', data);
     setIsSubmitting(true);
 
@@ -382,14 +384,14 @@ export default function CreateSaqPage() {
                   <div>
                     <label htmlFor={`questions.${index}.question`} className="block text-sm font-medium text-gray-700">Question</label>
                     <QuillEditor
-                      content={methods.watch(`questions.${index}.question`)}
+                      content={methods.watch(`questions.${index}.question`) as string}
                       onUpdate={(value) => methods.setValue(`questions.${index}.question`, value)}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Question Media</label>
                     <div className="flex items-center space-x-2">
-                      <Select onValueChange={(value) => methods.setValue(`questions.${index}.question_media_type`, value)}>
+                      <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.question_media_type`, value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Media Type" />
                         </SelectTrigger>
@@ -409,14 +411,14 @@ export default function CreateSaqPage() {
                   <div>
                     <label htmlFor={`questions.${index}.answer`} className="block text-sm font-medium text-gray-700">Answer</label>
                     <QuillEditor
-                      content={methods.watch(`questions.${index}.answer`)}
+                      content={methods.watch(`questions.${index}.answer`) as string}
                       onUpdate={(value) => methods.setValue(`questions.${index}.answer`, value)}
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Answer Media</label>
                     <div className="flex items-center space-x-2">
-                      <Select onValueChange={(value) => methods.setValue(`questions.${index}.answer_media_type`, value)}>
+                      <Select onValueChange={(value: "link" | "file") => methods.setValue(`questions.${index}.answer_media_type`, value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select Media Type" />
                         </SelectTrigger>
@@ -436,13 +438,13 @@ export default function CreateSaqPage() {
                   <div>
                     <label htmlFor={`questions.${index}.explanation`} className="block text-sm font-medium text-gray-700">Explanation</label>
                     <QuillEditor
-                      content={methods.watch(`questions.${index}.explanation`)}
+                      content={methods.watch(`questions.${index}.explanation`) as string}
                       onUpdate={(value) => methods.setValue(`questions.${index}.explanation`, value)}
                     />
                   </div>
                   <div>
                     <label htmlFor={`questions.${index}.difficulty`} className="block text-sm font-medium text-gray-700">Difficulty</label>
-                    <Select onValueChange={(value) => methods.setValue(`questions.${index}.difficulty`, value)}>
+                    <Select onValueChange={(value: "Easy" | "Medium" | "Hard") => methods.setValue(`questions.${index}.difficulty`, value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select Difficulty" />
                       </SelectTrigger>
@@ -459,7 +461,7 @@ export default function CreateSaqPage() {
           </div>
 
           <div className="flex justify-between">
-            {isMounted && <Button type="button" variant="secondary" onClick={() => append({ question: '', answer: '' })}>
+            {isMounted && <Button type="button" variant="secondary" onClick={() => append({ question: '', answer: '', difficulty: 'Easy' })}>
               Add Question
             </Button>}
             <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Creating SAQ...' : 'Create SAQ'}</Button>

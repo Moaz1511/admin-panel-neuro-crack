@@ -10,18 +10,7 @@ import TiptapEditor from '@/components/shared/tiptap-editor';
 import { Checkbox } from '@/components/ui/checkbox'; // Assuming you have a Checkbox component from shadcn-ui
 import { Trash2, PlusCircle } from 'lucide-react';
 
-// Define a more specific type for a question
-interface Question {
-  id?: string; // Optional for new questions
-  type: 'mcq' | 'saq' | 'cq';
-  title?: string; // For MCQ/SAQ
-  uddipok?: string; // For CQ
-  options?: string[]; // For MCQ
-  correctAnswerIndex?: number; // For MCQ
-  explanation?: string;
-  hint?: string;
-  sub_questions?: { question_text: string; answer_text: string }[]; // For CQ
-}
+import { Question } from './types';
 
 interface QuestionFormModalProps {
   isOpen: boolean;
@@ -43,14 +32,14 @@ export function QuestionFormModal({ isOpen, onClose, onSave, initialQuestion, qu
   useEffect(() => {
     if (initialQuestion) {
         if (initialQuestion.type === 'cq') {
-            setUddipok(initialQuestion.uddipok);
-            setSubQuestions(initialQuestion.sub_questions.length ? initialQuestion.sub_questions : [{ question_text: '', answer_text: '' }]);
+            setUddipok(initialQuestion.uddipok || '');
+            setSubQuestions(initialQuestion.sub_questions?.length ? initialQuestion.sub_questions : [{ question_text: '', answer_text: '' }]);
         } else {
-            setTitle(initialQuestion.title);
-            setOptions(initialQuestion.options.length ? initialQuestion.options : ['', '', '', '']);
-            setCorrectAnswerIndex(initialQuestion.correctAnswerIndex);
-            setExplanation(initialQuestion.explanation);
-            setHint(initialQuestion.hint);
+            setTitle(initialQuestion.title || '');
+            setOptions(initialQuestion.options?.length ? initialQuestion.options : ['', '', '', '']);
+            setCorrectAnswerIndex(initialQuestion.correctAnswerIndex ?? null);
+            setExplanation(initialQuestion.explanation || '');
+            setHint(initialQuestion.hint || '');
         }
     } else {
       // Reset form for new question
@@ -79,7 +68,7 @@ export function QuestionFormModal({ isOpen, onClose, onSave, initialQuestion, qu
     setOptions(options.filter((_, index) => index !== indexToRemove));
   }
 
-  const handleSubQuestionChange = (index: number, field: string, value: string) => {
+  const handleSubQuestionChange = (index: number, field: 'question_text' | 'answer_text', value: string) => {
     const newSubQuestions = [...subQuestions];
     newSubQuestions[index][field] = value;
     setSubQuestions(newSubQuestions);

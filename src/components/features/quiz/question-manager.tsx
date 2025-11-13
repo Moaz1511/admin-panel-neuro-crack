@@ -28,22 +28,18 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { Question } from './types';
 
-
-// Define the types for our question structure
-interface Question {
-  id: string;
-  type: 'mcq' | 'saq' | 'cq';
-  title?: string; // For MCQ/SAQ
-  uddipok?: string; // For CQ
-  options?: string[]; // For MCQ
-  correctAnswerIndex?: number; // For MCQ
-  explanation?: string;
-  sub_questions?: { question_text: string; answer_text: string }[]; // For CQ
+function hasId(q: Question): q is Question & { id: string } {
+    return q.id !== undefined;
 }
+
 
 // A new component for a single sortable question item
 function SortableQuestionItem({ q, index, onEdit, onDelete }: { q: Question; index: number; onEdit: (question: Question) => void; onDelete: (id: string, type: string) => void; }) {
+  if (!q.id) {
+    return null;
+  }
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: q.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
@@ -52,25 +48,25 @@ function SortableQuestionItem({ q, index, onEdit, onDelete }: { q: Question; ind
       case 'cq':
         return (
           <div>
-            <div className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: q.uddipok }} />
+            <div className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: q.uddipok || '' }} />
             {/* Render sub-questions here */}
           </div>
         );
       default:
         return (
           <div>
-            <div className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: q.title }} />
+            <div className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: q.title || '' }} />
             <div className="space-y-3 mt-4">
-              {q.options.map((option, optionIndex) => (
+              {q.options?.map((option, optionIndex) => (
                 <div key={optionIndex} className={`flex items-center p-3 rounded-md ${q.correctAnswerIndex === optionIndex ? 'bg-green-100 border-green-400 border' : 'bg-muted/50'}`}>
                   <span className="mr-3 font-semibold">{optionIndex + 1}</span>
-                  <div dangerouslySetInnerHTML={{ __html: option }} />
+                  <div dangerouslySetInnerHTML={{ __html: option || '' }} />
                 </div>
               ))}
             </div>
             <div className="mt-6 bg-gray-50 p-4 rounded-md">
               <h4 className="font-semibold mb-2">Explanation</h4>
-              <div className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: q.explanation }} />
+              <div className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: q.explanation || '' }} />
             </div>
           </div>
         );
@@ -86,7 +82,7 @@ function SortableQuestionItem({ q, index, onEdit, onDelete }: { q: Question; ind
         <span className="font-semibold text-sm">Question {index + 1} ({q.type.toUpperCase()})</span>
         <div className="ml-auto flex gap-2">
             <Button variant="outline" size="icon" onClick={() => onEdit(q)}><Pencil className="h-4 w-4" /></Button>
-            <Button variant="destructive" size="icon" onClick={() => onDelete(q.id, q.type)}><Trash2 className="h-4 w-4" /></Button>
+            <Button variant="destructive" size="icon" onClick={() => onDelete(q.id!, q.type)}><Trash2 className="h-4 w-4" /></Button>
         </div>
       </div>
       <div className="p-6">
@@ -207,16 +203,16 @@ export function QuestionManager({ moduleId }: { moduleId: string }) {
       </div>
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={questions} strategy={verticalListSortingStrategy}>
+        <SortableContext items={questions.filter(hasId)} strategy={verticalListSortingStrategy}>
           <div className="space-y-6">
             {questions.map((q, index) => (
-              <SortableQuestionItem 
+              q.id ? <SortableQuestionItem 
                 key={q.id} 
                 q={q} 
                 index={index} 
                 onEdit={handleEditQuestion} 
                 onDelete={handleDeleteQuestion} 
-              />
+              /> : null
             ))}
           </div>
         </SortableContext>

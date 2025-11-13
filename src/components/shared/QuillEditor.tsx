@@ -8,9 +8,11 @@ import { useEffect } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
 
+
+
 // THIS IS THE ONLY SETUP NEEDED
 if (typeof window !== 'undefined') {
-  window.katex = katex;
+  (window as any).katex = katex;
 }
 
 interface QuillEditorProps {
