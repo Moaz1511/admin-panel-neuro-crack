@@ -24,7 +24,7 @@ export default function UploadQuizPage() {
     }
 
     try {
-      await axios.post('${baseUrl}/api/quizzes/bulk-upload', formData, {
+      await axios.post(`${baseUrl}/api/quizzes/bulk-upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

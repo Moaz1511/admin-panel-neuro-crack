@@ -126,7 +126,7 @@ export default function CreateQuizPage() {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get('${baseUrl}/api/programs');
+        const response = await axios.get(`${baseUrl}/api/programs`);
         if (Array.isArray(response.data.data)) {
           setPrograms(response.data.data);
         }
@@ -294,7 +294,7 @@ export default function CreateQuizPage() {
           hint_video_url: q.hint_video_type === 'link' ? q.hint_video_link : q.hint_video_url,
           hint_audio_url: q.hint_audio_type === 'link' ? q.hint_audio_link : q.hint_audio_url,
         };
-        await axios.post('${baseUrl}/api/questions', transformedQuestion);
+        await axios.post(`${baseUrl}/api/questions`, transformedQuestion);
       }
       alert('MCQs created successfully!');
     } catch (error) {

@@ -95,7 +95,7 @@ export default function CreateSaqPage() {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get('${baseUrl}/api/programs');
+        const response = await axios.get(`${baseUrl}/api/programs`);
         if (Array.isArray(response.data.data)) {
           setPrograms(response.data.data);
         }
@@ -248,7 +248,7 @@ export default function CreateSaqPage() {
         question_text: q.question,
         answer_text: q.answer,
       };
-      return axios.post('${baseUrl}/api/saqs', payload);
+      return axios.post(`${baseUrl}/api/saqs`, payload);
     });
 
     try {

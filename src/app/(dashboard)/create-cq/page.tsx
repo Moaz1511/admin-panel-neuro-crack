@@ -94,7 +94,7 @@ export default function CreateCqPage() {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get('${baseUrl}/api/programs');
+        const response = await axios.get(`${baseUrl}/api/programs`);
         if (Array.isArray(response.data.data)) {
           setPrograms(response.data.data);
         }
@@ -252,7 +252,7 @@ export default function CreateCqPage() {
             answer: sq.answer,
           })),
         };
-        return axios.post('${baseUrl}/api/cqs', payload);
+        return axios.post(`${baseUrl}/api/cqs`, payload);
     });
 
     try {

@@ -74,7 +74,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get('${baseUrl}/api/programs');
+        const response = await axios.get(`${baseUrl}/api/programs`);
         if (Array.isArray(response.data.data)) {
           setPrograms(response.data.data);
         }
@@ -216,7 +216,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
     console.log('Submitting data:', data);
     setIsSubmitting(true);
     try {
-      const response = await axios.post('${baseUrl}/api/exams', data);
+      const response = await axios.post(`${baseUrl}/api/exams`, data);
       onNext(response.data.id, data.topic_id);
     } catch (error) {
       console.error('Error creating exam:', error);
