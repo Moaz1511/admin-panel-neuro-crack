@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from "sonner"
 import { AppConstants } from '@/lib/utils/app-constants'
+import { baseUrl } from './api-endpoints'
 
 // Log current environment (this will help verify)
 console.log('Current NODE_ENV:', process.env.NODE_ENV)
@@ -16,7 +17,7 @@ interface ApiResponse<T> {
 
 // Create axios instance with default config
 const axiosInstance = axios.create({
-  baseURL: AppConstants.api.baseUrl,
+  baseURL: baseUrl,
   timeout: AppConstants.api.timeout,
   headers: {
     'Content-Type': 'application/json'
