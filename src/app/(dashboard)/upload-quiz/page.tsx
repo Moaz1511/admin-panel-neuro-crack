@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/ui/file-upload';
 import axios from 'axios';
+import { baseUrl } from '@/lib/api/api-endpoints';
 
 export default function UploadQuizPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -23,7 +24,7 @@ export default function UploadQuizPage() {
     }
 
     try {
-      await axios.post('http://localhost:9000/api/quizzes/bulk-upload', formData, {
+      await axios.post('${baseUrl}/api/quizzes/bulk-upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

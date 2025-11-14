@@ -16,6 +16,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import axios from 'axios';
+import { baseUrl } from '@/lib/api/api-endpoints';
 
 const formSchema = z.object({
   program_id: z.string().min(1, { message: "Program is required" }),
@@ -73,7 +74,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get('http://localhost:9000/api/programs');
+        const response = await axios.get('${baseUrl}/api/programs');
         if (Array.isArray(response.data.data)) {
           setPrograms(response.data.data);
         }
@@ -101,7 +102,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (programId) {
         setClassesLoading(true);
         try {
-          const response = await axios.get(`http://localhost:9000/api/classes?program_id=${programId}`);
+          const response = await axios.get(`${baseUrl}/api/classes?program_id=${programId}`);
           if (Array.isArray(response.data.data)) {
             setClasses(response.data.data);
           }
@@ -128,7 +129,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (classId) {
         setGroupsLoading(true);
         try {
-          const response = await axios.get(`http://localhost:9000/api/groups?class_id=${classId}`);
+          const response = await axios.get(`${baseUrl}/api/groups?class_id=${classId}`);
           if (Array.isArray(response.data.data)) {
             setGroups(response.data.data);
           }
@@ -153,7 +154,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (groupId) {
         setSubjectsLoading(true);
         try {
-          const response = await axios.get(`http://localhost:9000/api/subjects?group_id=${groupId}`);
+          const response = await axios.get(`${baseUrl}/api/subjects?group_id=${groupId}`);
           if (Array.isArray(response.data.data)) {
             setSubjects(response.data.data);
           }
@@ -176,7 +177,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (subjectId) {
         setChaptersLoading(true);
         try {
-          const response = await axios.get(`http://localhost:9000/api/chapters?subject_id=${subjectId}`);
+          const response = await axios.get(`${baseUrl}/api/chapters?subject_id=${subjectId}`);
           if (Array.isArray(response.data.data)) {
             setChapters(response.data.data);
           }
@@ -197,7 +198,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (chapterId) {
         setTopicsLoading(true);
         try {
-          const response = await axios.get(`http://localhost:9000/api/topics?chapter_id=${chapterId}`);
+          const response = await axios.get(`${baseUrl}/api/topics?chapter_id=${chapterId}`);
           if (Array.isArray(response.data.data)) {
             setTopics(response.data.data);
           }
@@ -215,7 +216,7 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
     console.log('Submitting data:', data);
     setIsSubmitting(true);
     try {
-      const response = await axios.post('http://localhost:9000/api/exams', data);
+      const response = await axios.post('${baseUrl}/api/exams', data);
       onNext(response.data.id, data.topic_id);
     } catch (error) {
       console.error('Error creating exam:', error);
