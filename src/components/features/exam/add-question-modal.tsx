@@ -14,6 +14,7 @@ import axios from 'axios';
 import { Card } from '@/components/ui/card';
 import QuillViewer from '@/components/shared/QuillViewer';
 import { Question } from './types'; // 💡 Import shared types
+import { baseUrl } from '@/lib/api/api-endpoints';
 
 interface AddQuestionModalProps {
   isOpen: boolean;
@@ -46,9 +47,9 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQues
         setLoading(true);
         try {
           const [mcqsRes, cqsRes, saqsRes] = await Promise.all([
-            axios.get(`http://localhost:9000/api/questions/topic/${topicId}`),
-            axios.get(`http://localhost:9000/api/cqs/topic/${topicId}`),
-            axios.get(`http://localhost:9000/api/saqs/topic/${topicId}`),
+            axios.get(`${baseUrl}/api/questions/topic/${topicId}`),
+            axios.get(`${baseUrl}/api/cqs/topic/${topicId}`),
+            axios.get(`${baseUrl}/api/saqs/topic/${topicId}`),
           ]);
           setAvailableQuestions({
             mcq: mcqsRes.data.data.map((q: any) => ({ ...q, type: 'mcq' })),

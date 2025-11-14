@@ -13,6 +13,7 @@ import { AddQuestionModal } from './add-question-modal';
 import axios from 'axios';
 import { toast } from 'sonner'; // 💡 Use toast for feedback, not alert
 import { Question } from './types'; // 💡 Import shared types
+import { baseUrl } from '@/lib/api/api-endpoints';
 
 interface ExamQuestionManagerProps {
   examId: string;
@@ -78,7 +79,7 @@ export function ExamQuestionManager({ examId, topicId }: ExamQuestionManagerProp
     };
     setIsSubmitting(true);
     try {
-      await axios.put(`http://localhost:9000/api/exams/${examId}/questions`, data);
+      await axios.put(`${baseUrl}/api/exams/${examId}/questions`, data);
       toast.success('Exam questions updated successfully!'); // 💡 Better UX
     } catch (error) {
       console.error('Error updating exam questions:', error);
