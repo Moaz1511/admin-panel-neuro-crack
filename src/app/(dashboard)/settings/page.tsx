@@ -35,7 +35,9 @@ const settingsCategories = [
   }
 ]
 
-export default function SettingsPage() {
+import withAuth from '@/components/shared/withAuth';
+
+function SettingsPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center gap-4 mb-8">
@@ -69,4 +71,6 @@ export default function SettingsPage() {
       </div>
     </div>
   )
-} 
+}
+
+export default withAuth(SettingsPage); 

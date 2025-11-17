@@ -10,7 +10,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { SortableQuestionItem } from './sortable-question-item';
 import { AddQuestionModal } from './add-question-modal';
-import axios from 'axios';
+import { putRequest } from '@/lib/api/api-caller';
 import { toast } from 'sonner'; // 💡 Use toast for feedback, not alert
 import { Question } from './types'; // 💡 Import shared types
 import { baseUrl } from '@/lib/api/api-endpoints';
@@ -79,7 +79,7 @@ export function ExamQuestionManager({ examId, topicId }: ExamQuestionManagerProp
     };
     setIsSubmitting(true);
     try {
-      await axios.put(`${baseUrl}/api/exams/${examId}/questions`, data);
+      await putRequest(`/api/exams/${examId}/questions`, data);
       toast.success('Exam questions updated successfully!'); // 💡 Better UX
     } catch (error) {
       console.error('Error updating exam questions:', error);

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
@@ -14,12 +14,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import axios from 'axios';
+import { getRequest, postRequest } from '@/lib/api/api-caller';
 import dynamic from 'next/dynamic';
 import { baseUrl } from '@/lib/api/api-endpoints';
+import withAdminAuth from '@/components/shared/withAdminAuth';
 
-const QuillEditor = dynamic(
-  () => import('@/components/shared/QuillEditor'),
+const NewQuillEditor = dynamic(
+  () => import('@/components/shared/NewQuillEditor'),
   { ssr: false }
 );
 
@@ -46,7 +47,7 @@ const formSchema = z.object({
 
 type SaqData = z.infer<typeof formSchema>;
 
-export default function CreateSaqPage() {
+function CreateSaqPage() {
   const [programs, setPrograms] = useState([]);
   const [classes, setClasses] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -95,9 +96,9 @@ export default function CreateSaqPage() {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get(`${baseUrl}/api/programs`);
-        if (Array.isArray(response.data.data)) {
-          setPrograms(response.data.data);
+        const response: any = await getRequest(`/api/programs`);
+        if (Array.isArray(response.data)) {
+          setPrograms(response.data);
         }
       } catch (error) {
         console.error('Error fetching programs:', error);
@@ -123,9 +124,9 @@ export default function CreateSaqPage() {
       if (programId) {
         setClassesLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/classes?program_id=${programId}`);
-          if (Array.isArray(response.data.data)) {
-            setClasses(response.data.data);
+          const response: any = await getRequest(`/api/classes?program_id=${programId}`);
+          if (Array.isArray(response.data)) {
+            setClasses(response.data);
           }
         } catch (error) {
           console.error('Error fetching classes:', error);
@@ -150,9 +151,9 @@ export default function CreateSaqPage() {
       if (classId) {
         setGroupsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/groups?class_id=${classId}`);
-          if (Array.isArray(response.data.data)) {
-            setGroups(response.data.data);
+          const response: any = await getRequest(`/api/groups?class_id=${classId}`);
+          if (Array.isArray(response.data)) {
+            setGroups(response.data);
           }
         } catch (error) {
           console.error('Error fetching groups:', error);
@@ -175,9 +176,9 @@ export default function CreateSaqPage() {
       if (groupId) {
         setSubjectsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/subjects?group_id=${groupId}`);
-          if (Array.isArray(response.data.data)) {
-            setSubjects(response.data.data);
+          const response: any = await getRequest(`/api/subjects?group_id=${groupId}`);
+          if (Array.isArray(response.data)) {
+            setSubjects(response.data);
           }
         } catch (error) {
           console.error('Error fetching subjects:', error);
@@ -198,9 +199,9 @@ export default function CreateSaqPage() {
       if (subjectId) {
         setChaptersLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/chapters?subject_id=${subjectId}`);
-          if (Array.isArray(response.data.data)) {
-            setChapters(response.data.data);
+          const response: any = await getRequest(`/api/chapters?subject_id=${subjectId}`);
+          if (Array.isArray(response.data)) {
+            setChapters(response.data);
           }
         } catch (error) {
           console.error('Error fetching chapters:', error);
@@ -219,9 +220,9 @@ export default function CreateSaqPage() {
       if (chapterId) {
         setTopicsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/topics?chapter_id=${chapterId}`);
-          if (Array.isArray(response.data.data)) {
-            setTopics(response.data.data);
+          const response: any = await getRequest(`/api/topics?chapter_id=${chapterId}`);
+          if (Array.isArray(response.data)) {
+            setTopics(response.data);
           }
         } catch (error) {
           console.error('Error fetching topics:', error);
@@ -248,7 +249,7 @@ export default function CreateSaqPage() {
         question_text: q.question,
         answer_text: q.answer,
       };
-      return axios.post(`${baseUrl}/api/saqs`, payload);
+      return postRequest(`/api/saqs`, payload);
     });
 
     try {
@@ -384,7 +385,7 @@ export default function CreateSaqPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <label htmlFor={`questions.${index}.question`} className="block text-sm font-medium text-gray-700">Question</label>
-                    <QuillEditor
+                    <NewQuillEditor
                       content={methods.watch(`questions.${index}.question`) as string}
                       onUpdate={(value) => methods.setValue(`questions.${index}.question`, value)}
                     />
@@ -411,7 +412,7 @@ export default function CreateSaqPage() {
                   </div>
                   <div>
                     <label htmlFor={`questions.${index}.answer`} className="block text-sm font-medium text-gray-700">Answer</label>
-                    <QuillEditor
+                    <NewQuillEditor
                       content={methods.watch(`questions.${index}.answer`) as string}
                       onUpdate={(value) => methods.setValue(`questions.${index}.answer`, value)}
                     />
@@ -438,7 +439,7 @@ export default function CreateSaqPage() {
                   </div>
                   <div>
                     <label htmlFor={`questions.${index}.explanation`} className="block text-sm font-medium text-gray-700">Explanation</label>
-                    <QuillEditor
+                    <NewQuillEditor
                       content={methods.watch(`questions.${index}.explanation`) as string}
                       onUpdate={(value) => methods.setValue(`questions.${index}.explanation`, value)}
                     />
@@ -472,3 +473,5 @@ export default function CreateSaqPage() {
     </FormProvider>
   );
 }
+
+export default withAdminAuth(CreateSaqPage);

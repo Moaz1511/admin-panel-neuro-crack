@@ -20,10 +20,11 @@ interface LoginFormActionsProps {
  * Handles login form submission, validation, and error handling
  */
 export function LoginFormActions({ children }: LoginFormActionsProps) {
-  const { login, isLoading } = useAuth()
+  const { login, isAuthLoading } = useAuth()
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    console.log("Submitting login form");
 
     try {
       const formData = new FormData(event.currentTarget)
@@ -38,6 +39,7 @@ export function LoginFormActions({ children }: LoginFormActionsProps) {
       // Attempt login
       await login(validatedData)
     } catch (error) {
+      console.error("Login error:", error);
       if (error instanceof ZodError) {
         // Show validation error
         toast.error(error.errors[0].message)
@@ -57,11 +59,11 @@ export function LoginFormActions({ children }: LoginFormActionsProps) {
       <Button 
         type="submit" 
         className="w-full" 
-        disabled={isLoading}
-        aria-label={isLoading ? "Logging in..." : "Login"}
+        disabled={isAuthLoading}
+        aria-label={isAuthLoading ? "Logging in..." : "Login"}
       >
-        {isLoading ? "Logging in..." : "Login"}
+        {isAuthLoading ? "Logging in..." : "Login"}
       </Button>
     </form>
   )
-} 
+}

@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, useFieldArray, FormProvider, Controller } from 'react-hook-form';
+import { useForm, FormProvider, useFieldArray, useFormContext } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -14,18 +14,34 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import axios from 'axios';
-import { FileUpload } from '@/components/ui/file-upload';
-import { OptionsFieldArray } from './OptionsFieldArray';
+import { getRequest, postRequest } from '@/lib/api/api-caller';
 import dynamic from 'next/dynamic';
 import { baseUrl } from '@/lib/api/api-endpoints';
+import withAdminAuth from '@/components/shared/withAdminAuth';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
-const QuillEditor = dynamic(
-  () => import('@/components/shared/QuillEditor'),
+
+
+const NewQuillEditor = dynamic(
+  () => import('@/components/shared/NewQuillEditor'),
   { ssr: false }
 );
 
+
+
+const optionSchema = z.object({
+  text: z.string().min(1, { message: "Option text is required" }),
+  image_type: z.enum(["link", "file"]).optional(),
+  image_link: z.string().optional(),
+  image_file: z.any().optional(),
+  video_type: z.enum(["link", "file"]).optional(),
+  video_link: z.string().optional(),
+  video_file: z.any().optional(),
+  audio_type: z.enum(["link", "file"]).optional(),
+  audio_link: z.string().optional(),
+  audio_file: z.any().optional(),
+});
 
 const formSchema = z.object({
   program_id: z.string().min(1, { message: "Program is required" }),
@@ -46,20 +62,9 @@ const formSchema = z.object({
     question_audio_link: z.string().optional(),
     question_audio_url: z.string().optional(),
     difficulty: z.string().min(1, { message: "Difficulty is required" }),
-    reference: z.string().min(1, { message: "Reference is required" }),
-    correctAnswerIndex: z.string().min(1, { message: "A correct answer must be selected" }),
-    options: z.array(z.object({
-      text: z.string().min(1, { message: "Option text is required" }),
-      image_type: z.enum(["link", "file"]).optional(),
-      image_link: z.string().optional(),
-      image_file: z.any().optional(),
-      video_type: z.enum(["link", "file"]).optional(),
-      video_link: z.string().optional(),
-      video_file: z.any().optional(),
-      audio_type: z.enum(["link", "file"]).optional(),
-      audio_link: z.string().optional(),
-      audio_file: z.any().optional(),
-    })).min(2, { message: "At least two options are required" }),
+    reference: z.string().optional(),
+    options: z.array(optionSchema).min(2, { message: "At least two options are required" }),
+    correctAnswerIndex: z.string().min(1, { message: "Correct answer is required" }),
     explanation: z.string().optional(),
     explanation_image_type: z.enum(["link", "file"]).optional(),
     explanation_image_link: z.string().optional(),
@@ -83,7 +88,7 @@ const formSchema = z.object({
   })).min(1, { message: "At least one question is required" })
 });
 
-export default function CreateQuizPage() {
+function CreateQuizPage() {
   const [programs, setPrograms] = useState([]);
   const [classes, setClasses] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -126,9 +131,9 @@ export default function CreateQuizPage() {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get(`${baseUrl}/api/programs`);
-        if (Array.isArray(response.data.data)) {
-          setPrograms(response.data.data);
+        const response: any = await getRequest(`/api/programs`);
+        if (Array.isArray(response.data)) {
+          setPrograms(response.data);
         }
       } catch (error) {
         console.error('Error fetching programs:', error);
@@ -154,9 +159,9 @@ export default function CreateQuizPage() {
       if (programId) {
         setClassesLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/classes?program_id=${programId}`);
-          if (Array.isArray(response.data.data)) {
-            setClasses(response.data.data);
+          const response: any = await getRequest(`/api/classes?program_id=${programId}`);
+          if (Array.isArray(response.data)) {
+            setClasses(response.data);
           }
         } catch (error) {
           console.error('Error fetching classes:', error);
@@ -181,9 +186,9 @@ export default function CreateQuizPage() {
       if (classId) {
         setGroupsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/groups?class_id=${classId}`);
-          if (Array.isArray(response.data.data)) {
-            setGroups(response.data.data);
+          const response: any = await getRequest(`/api/groups?class_id=${classId}`);
+          if (Array.isArray(response.data)) {
+            setGroups(response.data);
           }
         } catch (error) {
           console.error('Error fetching groups:', error);
@@ -206,9 +211,9 @@ export default function CreateQuizPage() {
       if (groupId) {
         setSubjectsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/subjects?group_id=${groupId}`);
-          if (Array.isArray(response.data.data)) {
-            setSubjects(response.data.data);
+          const response: any = await getRequest(`/api/subjects?group_id=${groupId}`);
+          if (Array.isArray(response.data)) {
+            setSubjects(response.data);
           }
         } catch (error) {
           console.error('Error fetching subjects:', error);
@@ -229,9 +234,9 @@ export default function CreateQuizPage() {
       if (subjectId) {
         setChaptersLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/chapters?subject_id=${subjectId}`);
-          if (Array.isArray(response.data.data)) {
-            setChapters(response.data.data);
+          const response: any = await getRequest(`/api/chapters?subject_id=${subjectId}`);
+          if (Array.isArray(response.data)) {
+            setChapters(response.data);
           }
         } catch (error) {
           console.error('Error fetching chapters:', error);
@@ -250,9 +255,9 @@ export default function CreateQuizPage() {
       if (chapterId) {
         setTopicsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/topics?chapter_id=${chapterId}`);
-          if (Array.isArray(response.data.data)) {
-            setTopics(response.data.data);
+          const response: any = await getRequest(`/api/topics?chapter_id=${chapterId}`);
+          if (Array.isArray(response.data)) {
+            setTopics(response.data);
           }
         } catch (error) {
           console.error('Error fetching topics:', error);
@@ -294,7 +299,7 @@ export default function CreateQuizPage() {
           hint_video_url: q.hint_video_type === 'link' ? q.hint_video_link : q.hint_video_url,
           hint_audio_url: q.hint_audio_type === 'link' ? q.hint_audio_link : q.hint_audio_url,
         };
-        await axios.post(`${baseUrl}/api/questions`, transformedQuestion);
+        await postRequest(`/api/questions`, transformedQuestion);
       }
       alert('MCQs created successfully!');
     } catch (error) {
@@ -521,7 +526,7 @@ export default function CreateQuizPage() {
                     <label htmlFor={`questions.${index}.question`}>
                       Question
                     </label>
-                    <QuillEditor
+                    <NewQuillEditor
                       content={methods.watch(`questions.${index}.question`) as string}
                       onUpdate={(value) =>
                         methods.setValue(`questions.${index}.question`, value)
@@ -553,7 +558,7 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.question_image_link`)} placeholder="Image Link" />
                         )}
                         {methods.watch(`questions.${index}.question_image_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_image_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.question_image_url`)} />
                         )}
                       </div>
                     </div>
@@ -573,7 +578,7 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.question_video_link`)} placeholder="Video Link" />
                         )}
                         {methods.watch(`questions.${index}.question_video_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_video_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.question_video_url`)} />
                         )}
                       </div>
                     </div>
@@ -593,7 +598,7 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.question_audio_link`)} placeholder="Audio Link" />
                         )}
                         {methods.watch(`questions.${index}.question_audio_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.question_audio_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.question_audio_url`)} />
                         )}
                       </div>
                     </div>
@@ -634,7 +639,7 @@ export default function CreateQuizPage() {
                       <label htmlFor={`questions.${index}.reference`}>
                         Reference
                       </label>
-                      <QuillEditor
+                      <NewQuillEditor
                         content={methods.watch(`questions.${index}.reference`) as string}
                         onUpdate={(value) =>
                           methods.setValue(
@@ -670,7 +675,7 @@ export default function CreateQuizPage() {
                     <label htmlFor={`questions.${index}.explanation`}>
                       Explanation
                     </label>
-                    <QuillEditor
+                    <NewQuillEditor
                       content={methods.watch(`questions.${index}.explanation`) as string}
                       onUpdate={(value) =>
                         methods.setValue(
@@ -697,7 +702,7 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.explanation_image_link`)} placeholder="Image Link" />
                         )}
                         {methods.watch(`questions.${index}.explanation_image_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.explanation_image_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.explanation_image_url`)} />
                         )}
                       </div>
                     </div>
@@ -717,7 +722,7 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.explanation_video_link`)} placeholder="Video Link" />
                         )}
                         {methods.watch(`questions.${index}.explanation_video_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.explanation_video_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.explanation_video_url`)} />
                         )}
                       </div>
                     </div>
@@ -737,14 +742,14 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.explanation_audio_link`)} placeholder="Audio Link" />
                         )}
                         {methods.watch(`questions.${index}.explanation_audio_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.explanation_audio_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.explanation_audio_url`)} />
                         )}
                       </div>
                     </div>
                   </div>
                   <div>
                     <label htmlFor={`questions.${index}.hint`}>Hint</label>
-                    <QuillEditor
+                    <NewQuillEditor
                       content={methods.watch(`questions.${index}.hint`) as string}
                       onUpdate={(value) =>
                         methods.setValue(`questions.${index}.hint`, value)
@@ -768,7 +773,7 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.hint_image_link`)} placeholder="Image Link" />
                         )}
                         {methods.watch(`questions.${index}.hint_image_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.hint_image_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.hint_image_url`)} />
                         )}
                       </div>
                     </div>
@@ -788,7 +793,7 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.hint_video_link`)} placeholder="Video Link" />
                         )}
                         {methods.watch(`questions.${index}.hint_video_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.hint_video_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.hint_video_url`)} />
                         )}
                       </div>
                     </div>
@@ -808,7 +813,7 @@ export default function CreateQuizPage() {
                           <Input {...methods.register(`questions.${index}.hint_audio_link`)} placeholder="Audio Link" />
                         )}
                         {methods.watch(`questions.${index}.hint_audio_type`) === 'file' && (
-                          <FileUpload onUpload={(filePath) => methods.setValue(`questions.${index}.hint_audio_url`, filePath)} />
+                          <Input type="file" {...methods.register(`questions.${index}.hint_audio_url`)} />
                         )}
                       </div>
                     </div>
@@ -846,3 +851,109 @@ export default function CreateQuizPage() {
     </FormProvider>
   );
 }
+
+function OptionsFieldArray({ nestIndex }: { nestIndex: number }) {
+  const { control, watch, setValue, register } = useFormContext();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: `questions.${nestIndex}.options`
+  });
+
+  return (
+    <div className="space-y-4">
+      <RadioGroup
+        value={watch(`questions.${nestIndex}.correctAnswerIndex`)}
+        onValueChange={(value) => setValue(`questions.${nestIndex}.correctAnswerIndex`, value)}
+      >
+        {fields.map((item, k) => (
+          <div key={item.id} className="p-4 border rounded-md space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor={`questions.${nestIndex}.options.${k}.text`}>Option {k + 1}</Label>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value={k.toString()} id={`questions.${nestIndex}.options.${k}.correct`} />
+                <Label htmlFor={`questions.${nestIndex}.options.${k}.correct`}>Correct</Label>
+                <Button type="button" variant="destructive" size="sm" onClick={() => remove(k)}>Remove</Button>
+              </div>
+            </div>
+            <NewQuillEditor
+              content={watch(`questions.${nestIndex}.options.${k}.text`)}
+              onUpdate={(value) => setValue(`questions.${nestIndex}.options.${k}.text`, value)}
+            />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label>Image</label>
+                <div className="flex items-center space-x-2">
+                  <Select onValueChange={(value: "link" | "file") => setValue(`questions.${nestIndex}.options.${k}.image_type`, value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="link">Link</SelectItem>
+                      <SelectItem value="file">File</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {watch(`questions.${nestIndex}.options.${k}.image_type`) === 'link' && (
+                    <Input {...register(`questions.${nestIndex}.options.${k}.image_link`)} placeholder="Image Link" />
+                  )}
+                  {watch(`questions.${nestIndex}.options.${k}.image_type`) === 'file' && (
+                    <Input type="file" {...register(`questions.${nestIndex}.options.${k}.image_file`)} />
+                  )}
+                </div>
+              </div>
+              <div>
+                <label>Video</label>
+                <div className="flex items-center space-x-2">
+                  <Select onValueChange={(value: "link" | "file") => setValue(`questions.${nestIndex}.options.${k}.video_type`, value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="link">Link</SelectItem>
+                      <SelectItem value="file">File</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {watch(`questions.${nestIndex}.options.${k}.video_type`) === 'link' && (
+                    <Input {...register(`questions.${nestIndex}.options.${k}.video_link`)} placeholder="Video Link" />
+                  )}
+                  {watch(`questions.${nestIndex}.options.${k}.video_type`) === 'file' && (
+                    <Input type="file" {...register(`questions.${nestIndex}.options.${k}.video_file`)} />
+                  )}
+                </div>
+              </div>
+              <div>
+                <label>Audio</label>
+                <div className="flex items-center space-x-2">
+                  <Select onValueChange={(value: "link" | "file") => setValue(`questions.${nestIndex}.options.${k}.audio_type`, value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="link">Link</SelectItem>
+                      <SelectItem value="file">File</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {watch(`questions.${nestIndex}.options.${k}.audio_type`) === 'link' && (
+                    <Input {...register(`questions.${nestIndex}.options.${k}.audio_link`)} placeholder="Audio Link" />
+                  )}
+                  {watch(`questions.${nestIndex}.options.${k}.audio_type`) === 'file' && (
+                    <Input type="file" {...register(`questions.${nestIndex}.options.${k}.audio_file`)} />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </RadioGroup>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => append({ text: "" })}
+      >
+        Add Option
+      </Button>
+    </div>
+  );
+}
+
+export default withAdminAuth(CreateQuizPage);

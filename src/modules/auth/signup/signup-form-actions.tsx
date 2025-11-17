@@ -18,7 +18,7 @@ interface SignUpFormActionsProps {
  * Client component that handles form submission and validation
  */
 export function SignUpFormActions({ children }: SignUpFormActionsProps) {
-  const { register, isLoading } = useAuth()
+  const { register, isAuthLoading } = useAuth()
   const [showVerification, setShowVerification] = useState(false)
   const [registeredEmail, setRegisteredEmail] = useState("")
 
@@ -65,8 +65,8 @@ export function SignUpFormActions({ children }: SignUpFormActionsProps) {
     <>
       <form onSubmit={onSubmit} className="flex flex-col gap-6">
         {children}
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Creating Account..." : "Create Account"}
+        <Button type="submit" className="w-full" disabled={isAuthLoading}>
+          {isAuthLoading ? "Creating Account..." : "Create Account"}
         </Button>
       </form>
 

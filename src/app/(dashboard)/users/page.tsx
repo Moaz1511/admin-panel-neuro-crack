@@ -17,6 +17,8 @@ interface User {
   email: string;
 }
 
+import withAuth from '@/components/shared/withAuth';
+
 const UsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
 
@@ -57,4 +59,4 @@ const UsersPage = () => {
   );
 };
 
-export default UsersPage;
+export default withAuth(UsersPage);

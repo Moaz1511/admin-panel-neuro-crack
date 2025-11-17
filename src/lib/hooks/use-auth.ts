@@ -4,21 +4,15 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { AuthService } from "@/lib/services/auth-service"
 import type {
-  AuthState,
   LoginData,
   RegisterData,
   LoginResponse,
   RegisterResponse,
+  User,
 } from "@/lib/types/auth-types"
 import { toast } from "sonner"
 import { AppConstants } from "@/lib/utils/app-constants"
-
-const initialState: AuthState = {
-  user: null,
-  token: null,
-  isAuthenticated: false,
-  isLoading: true,
-}
+import { useAuthStore } from "../store/auth-store"
 
 /**
  * Custom hook for authentication state and operations
@@ -26,84 +20,88 @@ const initialState: AuthState = {
  */
 export function useAuth() {
   const router = useRouter()
-  const [state, setState] = useState<AuthState>(initialState)
+  const { 
+    token, 
+    user, 
+    role, 
+    setToken, 
+    setUser, 
+    clearAuth, 
+    isAuthenticated, 
+    _hasHydrated 
+  } = useAuthStore();
+  const [isApiLoading, setIsApiLoading] = useState(false); // Local loading state for API calls
 
-  // Initialize auth state
-  useEffect(() => {
-    try {
-      const token = AuthService.getAccessToken()
-      setState({
-        user: null, // We'll implement user fetching later
-        token,
-        isAuthenticated: !!token,
-        isLoading: false,
-      })
-    } catch (error) {
-      console.error('Error initializing auth state:', error)
-      setState(prev => ({ ...prev, isLoading: false }))
-    }
-  }, [])
+  // This is the single source of truth for auth loading state.
+  // It's true if the store hasn't rehydrated yet, or if an API call is in progress.
+  const isAuthLoading = !_hasHydrated || isApiLoading;
 
   /**
    * Register a new user
    */
   const register = async (data: RegisterData): Promise<RegisterResponse> => {
     try {
-      setState(prev => ({ ...prev, isLoading: true }))
-      const response = await AuthService.register(data)
-      setState(prev => ({ ...prev, isLoading: false }))
-      return response
+      setIsApiLoading(true);
+      const response = await AuthService.register(data);
+      setIsApiLoading(false);
+      if (response.success && response.data?.accessToken) {
+        setToken(response.data.accessToken);
+        setUser(response.data.user); 
+        toast.success("Registration successful!");
+        router.replace(AppConstants.routes.home);
+      }
+      return response;
     } catch (error) {
-      setState(prev => ({ ...prev, isLoading: false }))
-      throw error
+      setIsApiLoading(false);
+      throw error;
     }
-  }
+  };
 
   /**
    * Log in a user
    */
   const login = async (data: LoginData): Promise<LoginResponse> => {
+    console.log("useAuth.login called");
     try {
-      setState(prev => ({ ...prev, isLoading: true }))
-      const response = await AuthService.login(data)
+      setIsApiLoading(true);
+      const response = await AuthService.login(data);
+      setIsApiLoading(false);
 
       if (response.success && response.data?.accessToken) {
-        setState({
-          user: null, // We'll implement user fetching later
-          token: response.data.accessToken,
-          isAuthenticated: true,
-          isLoading: false,
-        })
-        
-        toast.success("Login successful!")
-        router.replace(AppConstants.routes.home)
+        console.log("Login successful, setting token and user");
+        setToken(response.data.accessToken);
+        setUser(response.data.user); 
+        toast.success("Login successful!");
+        console.log("Redirecting to dashboard");
+        router.replace(AppConstants.routes.home);
+        console.log("Redirected to dashboard");
       }
 
-      return response
+      return response;
     } catch (error) {
-      setState(prev => ({ ...prev, isLoading: false }))
-      throw error
+      setIsApiLoading(false);
+      throw error;
     }
-  }
+  };
 
   /**
    * Log out the current user
    */
   const logout = () => {
-    AuthService.logout()
-    setState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      isLoading: false,
-    })
-    router.replace(AppConstants.routes.login)
-  }
+    AuthService.logout();
+    clearAuth();
+    toast.info("Logged out successfully!");
+    router.replace(AppConstants.routes.login);
+  };
 
   return {
-    ...state,
+    token,
+    isAuthenticated,
+    user,
+    role,
+    isAuthLoading,
     register,
     login,
     logout,
-  }
-} 
+  };
+}

@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from '@/components/ui/input'; // 💡 Import Input for search
 import { Skeleton } from '@/components/ui/skeleton'; // 💡 Import Skeleton for loading
-import axios from 'axios';
+import { getRequest } from '@/lib/api/api-caller';
 import { Card } from '@/components/ui/card';
 import QuillViewer from '@/components/shared/QuillViewer';
 import { Question } from './types'; // 💡 Import shared types
@@ -46,15 +46,15 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQues
       if (topicId) {
         setLoading(true);
         try {
-          const [mcqsRes, cqsRes, saqsRes] = await Promise.all([
-            axios.get(`${baseUrl}/api/questions/topic/${topicId}`),
-            axios.get(`${baseUrl}/api/cqs/topic/${topicId}`),
-            axios.get(`${baseUrl}/api/saqs/topic/${topicId}`),
+          const [mcqsRes, cqsRes, saqsRes]: [any, any, any] = await Promise.all([
+            getRequest(`/api/questions/topic/${topicId}`),
+            getRequest(`/api/cqs/topic/${topicId}`),
+            getRequest(`/api/saqs/topic/${topicId}`),
           ]);
           setAvailableQuestions({
-            mcq: mcqsRes.data.data.map((q: any) => ({ ...q, type: 'mcq' })),
-            cq: cqsRes.data.data.map((q: any) => ({ ...q, type: 'cq' })),
-            saq: saqsRes.data.data.map((q: any) => ({ ...q, type: 'saq' })),
+            mcq: mcqsRes.data.map((q: any) => ({ ...q, type: 'mcq' })),
+            cq: cqsRes.data.map((q: any) => ({ ...q, type: 'cq' })),
+            saq: saqsRes.data.map((q: any) => ({ ...q, type: 'saq' })),
           });
         } catch (error) {
           console.error('Error fetching questions:', error);

@@ -1,10 +1,9 @@
 'use client'
 
 import { useState } from 'react';
-import axios from 'axios';
+import { axiosInstance } from '@/lib/api/api-caller';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { baseUrl } from '@/lib/api/api-endpoints';
 
 interface FileUploadProps {
   onUpload: (filePath: string) => void;
@@ -26,7 +25,7 @@ export function FileUpload({ onUpload }: FileUploadProps) {
     formData.append('file', file);
 
     try {
-      const response = await axios.post('${baseUrl}/api/upload', formData, {
+      const response = await axiosInstance.post('/api/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

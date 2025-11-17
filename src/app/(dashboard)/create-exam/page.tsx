@@ -15,16 +15,13 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import axios from 'axios';
 import { ExamSettingsForm } from '@/components/features/exam/exam-settings-form';
 import { ExamQuestionManager } from '@/components/features/exam/exam-question-manager';
 import { Separator } from '@/components/ui/separator';
 
-const formSchema = z.object({
-  // ... schema for exam settings
-});
+import withAdminAuth from '@/components/shared/withAdminAuth';
 
-export default function CreateExamPage() {
+function CreateExamPage() {
   const [step, setStep] = useState(1);
   const [examId, setExamId] = useState<string | null>(null);
   const [topicId, setTopicId] = useState<string | null>(null);
@@ -45,4 +42,6 @@ export default function CreateExamPage() {
     </main>
   );
 }
+
+export default withAdminAuth(CreateExamPage);
 

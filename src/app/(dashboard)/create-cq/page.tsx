@@ -14,12 +14,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import axios from 'axios';
+import { getRequest, postRequest } from '@/lib/api/api-caller';
 import dynamic from 'next/dynamic';
 import { baseUrl } from '@/lib/api/api-endpoints';
+import withAdminAuth from '@/components/shared/withAdminAuth';
 
-const QuillEditor = dynamic(
-  () => import('@/components/shared/QuillEditor'),
+const NewQuillEditor = dynamic(
+  () => import('@/components/shared/NewQuillEditor'),
   { ssr: false }
 );
 
@@ -46,7 +47,7 @@ const formSchema = z.object({
 
 type CqData = z.infer<typeof formSchema>;
 
-export default function CreateCqPage() {
+function CreateCqPage() {
   const [programs, setPrograms] = useState([]);
   const [classes, setClasses] = useState([]);
   const [groups, setGroups] = useState([]);
@@ -94,9 +95,9 @@ export default function CreateCqPage() {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get(`${baseUrl}/api/programs`);
-        if (Array.isArray(response.data.data)) {
-          setPrograms(response.data.data);
+        const response: any = await getRequest(`/api/programs`);
+        if (Array.isArray(response.data)) {
+          setPrograms(response.data);
         }
       } catch (error) {
         console.error('Error fetching programs:', error);
@@ -122,9 +123,9 @@ export default function CreateCqPage() {
       if (programId) {
         setClassesLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/classes?program_id=${programId}`);
-          if (Array.isArray(response.data.data)) {
-            setClasses(response.data.data);
+          const response: any = await getRequest(`/api/classes?program_id=${programId}`);
+          if (Array.isArray(response.data)) {
+            setClasses(response.data);
           }
         } catch (error) {
           console.error('Error fetching classes:', error);
@@ -149,9 +150,9 @@ export default function CreateCqPage() {
       if (classId) {
         setGroupsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/groups?class_id=${classId}`);
-          if (Array.isArray(response.data.data)) {
-            setGroups(response.data.data);
+          const response: any = await getRequest(`/api/groups?class_id=${classId}`);
+          if (Array.isArray(response.data)) {
+            setGroups(response.data);
           }
         } catch (error) {
           console.error('Error fetching groups:', error);
@@ -174,9 +175,9 @@ export default function CreateCqPage() {
       if (groupId) {
         setSubjectsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/subjects?group_id=${groupId}`);
-          if (Array.isArray(response.data.data)) {
-            setSubjects(response.data.data);
+          const response: any = await getRequest(`/api/subjects?group_id=${groupId}`);
+          if (Array.isArray(response.data)) {
+            setSubjects(response.data);
           }
         } catch (error) {
           console.error('Error fetching subjects:', error);
@@ -197,9 +198,9 @@ export default function CreateCqPage() {
       if (subjectId) {
         setChaptersLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/chapters?subject_id=${subjectId}`);
-          if (Array.isArray(response.data.data)) {
-            setChapters(response.data.data);
+          const response: any = await getRequest(`/api/chapters?subject_id=${subjectId}`);
+          if (Array.isArray(response.data)) {
+            setChapters(response.data);
           }
         } catch (error) {
           console.error('Error fetching chapters:', error);
@@ -218,9 +219,9 @@ export default function CreateCqPage() {
       if (chapterId) {
         setTopicsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/topics?chapter_id=${chapterId}`);
-          if (Array.isArray(response.data.data)) {
-            setTopics(response.data.data);
+          const response: any = await getRequest(`/api/topics?chapter_id=${chapterId}`);
+          if (Array.isArray(response.data)) {
+            setTopics(response.data);
           }
         } catch (error) {
           console.error('Error fetching topics:', error);
@@ -252,7 +253,7 @@ export default function CreateCqPage() {
             answer: sq.answer,
           })),
         };
-        return axios.post(`${baseUrl}/api/cqs`, payload);
+        return postRequest(`/api/cqs`, payload);
     });
 
     try {
@@ -388,7 +389,7 @@ export default function CreateCqPage() {
                 <CardContent className="space-y-4">
                   <div>
                     <label htmlFor={`cqs.${index}.uddipok`} className="block text-sm font-medium text-gray-700">Uddipok (Stimulus)</label>
-                    <QuillEditor
+                    <NewQuillEditor
                       content={methods.watch(`cqs.${index}.uddipok`) as string}
                       onUpdate={(value) => methods.setValue(`cqs.${index}.uddipok`, value)}
                     />
@@ -431,7 +432,7 @@ export default function CreateCqPage() {
 
                   <div>
                     <label htmlFor={`cqs.${index}.reference`} className="block text-sm font-medium text-gray-700">Reference</label>
-                    <QuillEditor
+                    <NewQuillEditor
                       content={methods.watch(`cqs.${index}.reference`) as string}
                       onUpdate={(value) => methods.setValue(`cqs.${index}.reference`, value)}
                     />
@@ -472,14 +473,14 @@ function SubQuestions({ cqIndex }: { cqIndex: number }) {
           </div>
           <div>
             <label htmlFor={`cqs.${cqIndex}.sub_questions.${index}.question`} className="block text-sm font-medium text-gray-700">Question</label>
-            <QuillEditor
+            <NewQuillEditor
               content={watch(`cqs.${cqIndex}.sub_questions.${index}.question`) as string}
               onUpdate={(value) => setValue(`cqs.${cqIndex}.sub_questions.${index}.question`, value)}
             />
           </div>
           <div>
             <label htmlFor={`cqs.${cqIndex}.sub_questions.${index}.answer`} className="block text-sm font-medium text-gray-700">Answer</label>
-            <QuillEditor
+            <NewQuillEditor
               content={watch(`cqs.${cqIndex}.sub_questions.${index}.answer`) as string}
               onUpdate={(value) => setValue(`cqs.${cqIndex}.sub_questions.${index}.answer`, value)}
             />
@@ -492,3 +493,5 @@ function SubQuestions({ cqIndex }: { cqIndex: number }) {
     </div>
   )
 }
+
+export default withAdminAuth(CreateCqPage);

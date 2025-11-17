@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { toast } from "sonner"
 import { AppConstants } from '@/lib/utils/app-constants'
 import { baseUrl } from './api-endpoints'
+import { useAuthStore } from '../store/auth-store'
 
 // Log current environment (this will help verify)
 console.log('Current NODE_ENV:', process.env.NODE_ENV)
@@ -16,7 +17,7 @@ interface ApiResponse<T> {
 }
 
 // Create axios instance with default config
-const axiosInstance = axios.create({
+export const axiosInstance = axios.create({
   baseURL: baseUrl,
   timeout: AppConstants.api.timeout,
   headers: {
@@ -29,15 +30,40 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token')
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`
+      console.log("--- NEW AXIOS INTERCEPTOR ---"); // <-- New log
+      
+      // 1. Try to get the token from the "live" Zustand state
+      let token = useAuthStore.getState().token;
+      console.log("1. Token from Zustand state:", token);
+
+      // 2. If the state token is null, try localStorage fallback
+      if (!token) {
+        console.log("2. Zustand token is null, trying localStorage fallback...");
+        const authStorage = localStorage.getItem('auth-storage');
+        console.log("3. Raw auth-storage from localStorage:", authStorage);
+        
+        if (authStorage) {
+          try {
+            const { state } = JSON.parse(authStorage);
+            token = state.token; // Get token from parsed state
+            console.log("4. Token from localStorage parse:", token);
+          } catch (e) {
+            console.error("Could not parse auth-storage from localStorage", e);
+          }
+        }
       }
+      
+      // 5. Add the token to the header if we found it
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      
+      console.log("5. Final Authorization Header:", config.headers.Authorization);
     }
-    return config
+    return config;
   },
   (error) => Promise.reject(error)
-)
+);
 
 // Handle API errors
 const handleApiError = <T>(error: AxiosError<ApiResponse<T>>) => {
@@ -99,9 +125,11 @@ axiosInstance.interceptors.response.use(
         // Call refresh token endpoint
         const response = await axiosInstance.post('/auth/refresh-token')
         const newAccessToken = response.data.accessToken
+
+        useAuthStore.getState().setToken(newAccessToken);
         
         // Store new access token
-        localStorage.setItem('access_token', newAccessToken)
+        // localStorage.setItem('access_token', newAccessToken)
         
         // Update original request with new token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
@@ -109,8 +137,12 @@ axiosInstance.interceptors.response.use(
         // Retry original request
         return axiosInstance(originalRequest)
       } catch (refreshError) {
+        
         // Clear token and redirect on refresh failure
-        localStorage.removeItem('access_token')
+
+        useAuthStore.getState().clearAuth();
+
+        // localStorage.removeItem('access_token')
         if (!isLoginRoute && typeof window !== 'undefined') {
           window.location.href = AppConstants.routes.login
         }
@@ -125,6 +157,7 @@ axiosInstance.interceptors.response.use(
 // Request helpers
 export const getRequest = async <T>(url: string): Promise<T> => {
   try {
+    console.log(`Making GET request to: ${url}`);
     return await axiosInstance.get(url)
   } catch (error) {
     throw error

@@ -6,8 +6,8 @@ import dynamic from 'next/dynamic';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const QuillEditor = dynamic(
-  () => import('@/components/shared/QuillEditor'),
+const NewQuillEditor = dynamic(
+  () => import('@/components/shared/NewQuillEditor'),
   { ssr: false }
 );
 
@@ -31,7 +31,7 @@ export function OptionsFieldArray({ nestIndex }: { nestIndex: number }) {
                   <div className="flex items-center space-x-4">
                     <RadioGroupItem value={k.toString()} />
                     <div className="flex-grow">
-                      <QuillEditor
+                      <NewQuillEditor
                         content={watch(`questions.${nestIndex}.options.${k}.text`) as string}
                         onUpdate={(value) => setValue(`questions.${nestIndex}.options.${k}.text`, value)}
                       />

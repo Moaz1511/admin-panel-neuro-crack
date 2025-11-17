@@ -7,6 +7,7 @@ import type {
   RegisterResponse,
   User,
 } from "@/lib/types/auth-types"
+import { useAuthStore } from "../store/auth-store"
 
 const isServer = typeof window === 'undefined'
 
@@ -15,21 +16,15 @@ const isServer = typeof window === 'undefined'
  * Handles all authentication-related operations
  */
 export class AuthService {
-  private static readonly ACCESS_TOKEN_KEY = "access_token"
-  private static readonly USER_KEY = "auth_user"
-
   /**
    * Register a new user
    */
   static async register(data: RegisterData): Promise<RegisterResponse> {
     try {
       const response = await postRequest<RegisterResponse, RegisterData>(ApiEndpoints.auth.register, data)
-      
-      if (response?.success && response?.data?.accessToken) {
-        this.setAccessToken(response.data.accessToken)
-        // After registration, fetch user data
-        // const user = await this.getProfile()
-        // this.setUser(user)
+      if (response.data?.accessToken) {
+        useAuthStore.getState().setToken(response.data.accessToken)
+        useAuthStore.getState().setUser(response.data.user)
       }
 
       return response
@@ -44,13 +39,11 @@ export class AuthService {
   static async login(data: LoginData): Promise<LoginResponse> {
     try {
       const response = await postRequest<LoginResponse, LoginData>(ApiEndpoints.auth.login, data)
+      console.log("API Response (Login):", response);
 
-      if (response?.success && response?.data?.accessToken) {
-        // Store token consistently
-        this.setAccessToken(response.data.accessToken)
-        // After login, fetch user data
-        // const user = await this.getProfile()
-        // this.setUser(user)
+      if (response.data?.accessToken) {
+        useAuthStore.getState().setToken(response.data.accessToken)
+        useAuthStore.getState().setUser(response.data.user)
       }
 
       return response
@@ -63,8 +56,7 @@ export class AuthService {
    * Logout user
    */
   static logout(): void {
-    this.removeAccessToken()
-    this.removeUser()
+    useAuthStore.getState().clearAuth()
     // The refresh token cookie will be cleared by the backend
   }
 
@@ -120,61 +112,11 @@ export class AuthService {
   }
 
   /**
-   * Check if user is authenticated
-   */
-  static isAuthenticated(): boolean {
-    if (isServer) return false
-    const token = this.getAccessToken()
-    return !!token
-  }
-
-  /**
-   * Get the current user
-   */
-  static getUser(): User | null {
-    if (isServer) return null
-    const user = localStorage.getItem(this.USER_KEY)
-    return user ? JSON.parse(user) : null
-  }
-
-  /**
    * Get the access token
    */
   static getAccessToken(): string | null {
     if (isServer) return null
-    return localStorage.getItem(this.ACCESS_TOKEN_KEY)
-  }
-
-  /**
-   * Set the access token
-   */
-  private static setAccessToken(token: string): void {
-    if (isServer) return
-    localStorage.setItem(this.ACCESS_TOKEN_KEY, token)
-  }
-
-  /**
-   * Set the current user
-   */
-  private static setUser(user: User): void {
-    if (isServer) return
-    localStorage.setItem(this.USER_KEY, JSON.stringify(user))
-  }
-
-  /**
-   * Remove the access token
-   */
-  private static removeAccessToken(): void {
-    if (isServer) return
-    localStorage.removeItem(this.ACCESS_TOKEN_KEY)
-  }
-
-  /**
-   * Remove the current user
-   */
-  private static removeUser(): void {
-    if (isServer) return
-    localStorage.removeItem(this.USER_KEY)
+    return useAuthStore.getState().token
   }
 
   /**
@@ -187,4 +129,4 @@ export class AuthService {
       throw error
     }
   }
-} 
+}

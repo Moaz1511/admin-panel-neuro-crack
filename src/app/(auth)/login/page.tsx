@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import { useAuth } from '@/lib/hooks/use-auth'
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { LoginFormActions } from "@/modules/auth/login/login-form-actions"
 import { CardContent } from "@/components/ui/card"
 import { Card } from "@/components/ui/card"
@@ -14,16 +12,9 @@ import Link from "next/link"
 import { AppConstants } from '@/lib/utils/app-constants'
 
 export default function LoginPage() {
-  const { isAuthenticated, isLoading } = useAuth()
-  const router = useRouter()
+  const { isAuthLoading } = useAuth()
 
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      router.replace(AppConstants.routes.home)
-    }
-  }, [isLoading, isAuthenticated, router])
-
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>

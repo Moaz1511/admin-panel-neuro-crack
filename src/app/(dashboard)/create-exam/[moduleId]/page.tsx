@@ -7,11 +7,13 @@ import { QuizSettingsForm } from '@/components/features/quiz/quiz-settings-form'
 import { QuestionManager } from '@/components/features/quiz/question-manager'
 import { Separator } from '@/components/ui/separator'
 import { useSearchParams, useParams } from 'next/navigation'
-import axios from 'axios';
+import { getRequest } from '@/lib/api/api-caller';
 import { ApiEndpoints } from '@/lib/api/api-endpoints';
 
+import withAdminAuth from '@/components/shared/withAdminAuth';
+
 // 2. Use the new interface
-export default function CreateExamPage() {
+function CreateExamPage() {
   const params = useParams();
   const moduleId = params.moduleId as string;
   const searchParams = useSearchParams()
@@ -25,10 +27,10 @@ export default function CreateExamPage() {
     if (moduleId !== 'new') {
         const fetchQuiz = async () => {
             try {
-                const response = await axios.get(`${ApiEndpoints.quizzes.getById}${moduleId}`);
-                setQuiz(response.data.data);
-                setQuestions(response.data.data.questions || []);
-                setQuizType(response.data.data.quiz_type || 'mcq');
+                const response: any = await getRequest(`${ApiEndpoints.quizzes.getById}${moduleId}`);
+                setQuiz(response.data);
+                setQuestions(response.data.questions || []);
+                setQuizType(response.data.quiz_type || 'mcq');
             } catch (error) {
                 console.error('Error fetching quiz:', error);
             } finally {
@@ -55,3 +57,5 @@ export default function CreateExamPage() {
     </div>
   )
 }
+
+export default withAdminAuth(CreateExamPage);

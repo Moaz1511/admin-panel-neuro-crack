@@ -1,6 +1,7 @@
 'use client'
 
 import { TrendingUp, Users, FileQuestion, BarChart, Calendar } from 'lucide-react'
+import withAuth from '@/components/shared/withAuth';
 
 // Quick stats data
 const quickStats = [
@@ -10,7 +11,7 @@ const quickStats = [
   { title: 'Total Revenue', value: '৳12,345', icon: BarChart, trend: '+15%', color: 'from-orange-600 to-orange-400' },
 ]
 
-export default function DashboardPage() {
+function DashboardPage() {
   return (
     <div className="w-full mx-auto px-4 py-4">
       {/* Quick Stats */}
@@ -84,3 +85,5 @@ export default function DashboardPage() {
     </div>
   )
 } 
+
+export default withAuth(DashboardPage); 

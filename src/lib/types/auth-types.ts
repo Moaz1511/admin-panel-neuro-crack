@@ -44,7 +44,8 @@ export interface ApiResponse<T> {
  * Auth token response interface
  */
 export interface AuthTokenResponse {
-  accessToken: string
+  accessToken: string;
+  user: User;
 }
 
 /**
@@ -55,8 +56,8 @@ export interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
-  isLoading: boolean
+  isAuthLoading: boolean
 }
 
 export type LoginResponse = ApiResponse<AuthTokenResponse>
-export type RegisterResponse = ApiResponse<AuthTokenResponse> 
+export type RegisterResponse = ApiResponse<AuthTokenResponse>

@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileUpload } from '@/components/ui/file-upload';
-import axios from 'axios';
+import { axiosInstance } from '@/lib/api/api-caller';
 import { baseUrl } from '@/lib/api/api-endpoints';
 
-export default function UploadQuizPage() {
+import withAdminAuth from '@/components/shared/withAdminAuth';
+
+function UploadQuizPage() {
   const [file, setFile] = useState<File | null>(null);
   const [googleSheetLink, setGoogleSheetLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,10 +26,11 @@ export default function UploadQuizPage() {
     }
 
     try {
-      await axios.post(`${baseUrl}/api/quizzes/bulk-upload`, formData, {
+      await axiosInstance.post(`/api/quizzes/bulk-upload`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        timeout: 60000, // 60-second timeout for this specific request
       });
       alert('Bulk upload successful!');
     } catch (error) {
@@ -67,3 +70,5 @@ export default function UploadQuizPage() {
     </div>
   );
 }
+
+export default withAdminAuth(UploadQuizPage);

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { axiosInstance } from '../api/api-caller';
 import { ApiEndpoints } from '../api/api-endpoints';
 
 
@@ -7,7 +7,7 @@ export class DocsToExcelService {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      const response = await axios.post(ApiEndpoints.ai.uploadDocx, formData, {
+      const response = await axiosInstance.post(ApiEndpoints.ai.uploadDocx, formData, {
         responseType: 'blob',
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -15,10 +15,8 @@ export class DocsToExcelService {
       });
       return response.data as Blob;
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        throw error?.response?.data || error.message || 'Failed to convert file';
-      }
-      throw 'Failed to convert file';
+      // Re-throwing the error to be handled by the caller
+      throw error;
     }
   }
 } 

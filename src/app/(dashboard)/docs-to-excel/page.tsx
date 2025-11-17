@@ -1,19 +1,25 @@
-"use client";
-import React, { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { UploadCloud, FileText, FileSpreadsheet, Loader2, Download, RefreshCw, Eye, CircleMinus, Database, Edit, CircleAlert } from "lucide-react";
-import { toast } from 'sonner';
+'use client';
+
+import { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  UploadCloud,
+  FileSpreadsheet,
+  RefreshCw,
+  Download,
+  Eye,
+  Edit,
+  Database,
+  FileText,
+  Loader2,
+  CircleMinus
+} from 'lucide-react';
 import { useDocsToExcel } from '@/lib/hooks/use-docs-to-excel';
+import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import withAuth from '@/components/shared/withAuth';
 
-const showErrorToast = (message: string) => {
-    toast(message, {
-      icon: <CircleAlert className="text-red-500" size={20} />,
-      style: { color: 'black' }
-    })
-  }
-
-export default function DocsToExcelPage() {
+function DocsToExcelPage() {
   const [file, setFile] = useState<File | null>(null);
   const [excelBlob, setExcelBlob] = useState<Blob | null>(null);
   const [showPreview, setShowPreview] = useState(false);
@@ -23,6 +29,10 @@ export default function DocsToExcelPage() {
   const [dragActive, setDragActive] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { convertDocToExcel, isLoading } = useDocsToExcel();
+
+  const showErrorToast = (message: string) => {
+    toast.error(message);
+  };
 
   // Always clear file input and state before new upload
   const clearFile = () => {
@@ -356,3 +366,5 @@ export default function DocsToExcelPage() {
     </div>
   );
 }
+
+export default withAuth(DocsToExcelPage);

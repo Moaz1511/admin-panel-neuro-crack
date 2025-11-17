@@ -13,7 +13,7 @@ import { Upload, Calendar } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css' // Import Datepicker styles
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import axios from 'axios';
+import { getRequest, postRequest, putRequest } from '@/lib/api/api-caller';
 import { ApiEndpoints } from '@/lib/api/api-endpoints';
 
 // CORRECT: Only import the custom dynamic wrapper component
@@ -52,8 +52,8 @@ export function QuizSettingsForm({ moduleId, chapterId, initialQuizData, quizTyp
     if (chapterId) {
         const fetchTopics = async () => {
             try {
-                const response = await axios.get(`${ApiEndpoints.topics.getByChapterId}${chapterId}`);
-                setTopics(response.data.data);
+                const response: any = await getRequest(`${ApiEndpoints.topics.getByChapterId}${chapterId}`);
+                setTopics(response.data);
             } catch (error) {
                 console.error('Error fetching topics:', error);
             }
@@ -86,11 +86,11 @@ export function QuizSettingsForm({ moduleId, chapterId, initialQuizData, quizTyp
     }
     try {
         if (isNew) {
-            const response = await axios.post(ApiEndpoints.quizzes.create, formJson);
-            const newModuleId = response.data.id;
+            const response: any = await postRequest(ApiEndpoints.quizzes.create, formJson);
+            const newModuleId = response.id;
             router.push(`/create-quiz/${newModuleId}${chapterId ? `?chapterId=${chapterId}` : ''}`);
         } else {
-            await axios.put(`${ApiEndpoints.quizzes.update}${moduleId}`, formJson);
+            await putRequest(`${ApiEndpoints.quizzes.update}${moduleId}`, formJson);
             // maybe show a toast notification
         }
     } catch (error) {

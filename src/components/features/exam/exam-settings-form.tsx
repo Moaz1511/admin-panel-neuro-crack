@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import axios from 'axios';
+import { getRequest, postRequest } from '@/lib/api/api-caller';
 import { baseUrl } from '@/lib/api/api-endpoints';
 
 const formSchema = z.object({
@@ -74,9 +74,10 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
     const fetchPrograms = async () => {
       setProgramsLoading(true);
       try {
-        const response = await axios.get(`${baseUrl}/api/programs`);
-        if (Array.isArray(response.data.data)) {
-          setPrograms(response.data.data);
+        const response: any = await getRequest(`/api/programs`);
+        console.log('Response from /api/programs:', response);
+        if (Array.isArray(response.data)) {
+          setPrograms(response.data);
         }
       } catch (error) {
         console.error('Error fetching programs:', error);
@@ -102,9 +103,9 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (programId) {
         setClassesLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/classes?program_id=${programId}`);
-          if (Array.isArray(response.data.data)) {
-            setClasses(response.data.data);
+          const response: any = await getRequest(`/api/classes?program_id=${programId}`);
+          if (Array.isArray(response.data)) {
+            setClasses(response.data);
           }
         } catch (error) {
           console.error('Error fetching classes:', error);
@@ -129,9 +130,9 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (classId) {
         setGroupsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/groups?class_id=${classId}`);
-          if (Array.isArray(response.data.data)) {
-            setGroups(response.data.data);
+          const response: any = await getRequest(`/api/groups?class_id=${classId}`);
+          if (Array.isArray(response.data)) {
+            setGroups(response.data);
           }
         } catch (error) {
           console.error('Error fetching groups:', error);
@@ -154,9 +155,9 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (groupId) {
         setSubjectsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/subjects?group_id=${groupId}`);
-          if (Array.isArray(response.data.data)) {
-            setSubjects(response.data.data);
+          const response: any = await getRequest(`/api/subjects?group_id=${groupId}`);
+          if (Array.isArray(response.data)) {
+            setSubjects(response.data);
           }
         } catch (error) {
           console.error('Error fetching subjects:', error);
@@ -177,9 +178,9 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (subjectId) {
         setChaptersLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/chapters?subject_id=${subjectId}`);
-          if (Array.isArray(response.data.data)) {
-            setChapters(response.data.data);
+          const response: any = await getRequest(`/api/chapters?subject_id=${subjectId}`);
+          if (Array.isArray(response.data)) {
+            setChapters(response.data);
           }
         } catch (error) {
           console.error('Error fetching chapters:', error);
@@ -198,9 +199,9 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
       if (chapterId) {
         setTopicsLoading(true);
         try {
-          const response = await axios.get(`${baseUrl}/api/topics?chapter_id=${chapterId}`);
-          if (Array.isArray(response.data.data)) {
-            setTopics(response.data.data);
+          const response: any = await getRequest(`/api/topics?chapter_id=${chapterId}`);
+          if (Array.isArray(response.data)) {
+            setTopics(response.data);
           }
         } catch (error) {
           console.error('Error fetching topics:', error);
@@ -216,8 +217,8 @@ export function ExamSettingsForm({ onNext }: ExamSettingsFormProps) {
     console.log('Submitting data:', data);
     setIsSubmitting(true);
     try {
-      const response = await axios.post(`${baseUrl}/api/exams`, data);
-      onNext(response.data.id, data.topic_id);
+      const response: any = await postRequest('/api/exams', data);
+      onNext(response.id, data.topic_id);
     } catch (error) {
       console.error('Error creating exam:', error);
       alert('Error creating exam. Please check the console for details.');

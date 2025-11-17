@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, GripVertical, Pencil, Trash2 } from 'lucide-react'
 import { QuestionFormModal } from './question-form-modal'
-import axios from 'axios';
+import { getRequest, postRequest, putRequest, deleteRequest } from '@/lib/api/api-caller';
 import { ApiEndpoints } from '@/lib/api/api-endpoints';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -104,8 +104,8 @@ export function QuestionManager({ moduleId }: { moduleId: string }) {
     if (moduleId !== 'new') {
         const fetchQuestions = async () => {
             try {
-                const response = await axios.get(`${ApiEndpoints.quizzes.getById}${moduleId}`);
-                const quizData = response.data.data;
+                const response: any = await getRequest(`${ApiEndpoints.quizzes.getById}${moduleId}`);
+                const quizData = response.data;
                 const mcqs = (quizData.questions || []).map((q: any) => ({ ...q, type: 'mcq' }));
                 const cqs = (quizData.cqs || []).map((c: any) => ({ ...c, type: 'cq' }));
                 setQuestions([...mcqs, ...cqs]);
@@ -141,9 +141,9 @@ export function QuestionManager({ moduleId }: { moduleId: string }) {
   const handleDeleteQuestion = async (id: string, type: string) => {
     try {
         if (type === 'cq') {
-            await axios.delete(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs/${id}`);
+            await deleteRequest(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs/${id}`);
         } else {
-            await axios.delete(`${ApiEndpoints.quizzes.base}/${moduleId}/questions/${id}`);
+            await deleteRequest(`${ApiEndpoints.quizzes.base}/${moduleId}/questions/${id}`);
         }
         setQuestions(questions.filter(q => q.id !== id));
     } catch (error) {
@@ -156,26 +156,26 @@ export function QuestionManager({ moduleId }: { moduleId: string }) {
     if (savedQuestion.id) {
         // Update
         try {
-            let response;
+            let response: any;
             if (savedQuestion.type === 'cq') {
-                response = await axios.put(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs/${savedQuestion.id}`, savedQuestion);
+                response = await putRequest(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs/${savedQuestion.id}`, savedQuestion);
             } else {
-                response = await axios.put(`${ApiEndpoints.quizzes.base}/${moduleId}/questions/${savedQuestion.id}`, savedQuestion);
+                response = await putRequest(`${ApiEndpoints.quizzes.base}/${moduleId}/questions/${savedQuestion.id}`, savedQuestion);
             }
-            setQuestions(questions.map(q => q.id === savedQuestion.id ? response.data : q));
+            setQuestions(questions.map(q => q.id === savedQuestion.id ? response : q));
         } catch (error) {
             console.error('Error updating question:', error);
         }
     } else {
         // Create
         try {
-            let response;
+            let response: any;
             if (savedQuestion.type === 'cq') {
-                response = await axios.post(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs`, savedQuestion);
+                response = await postRequest(`${ApiEndpoints.quizzes.base}/${moduleId}/cqs`, savedQuestion);
             } else {
-                response = await axios.post(`${ApiEndpoints.quizzes.base}/${moduleId}/questions`, savedQuestion);
+                response = await postRequest(`${ApiEndpoints.quizzes.base}/${moduleId}/questions`, savedQuestion);
             }
-            setQuestions([...questions, response.data]);
+            setQuestions([...questions, response]);
         } catch (error) {
             console.error('Error creating question:', error);
         }

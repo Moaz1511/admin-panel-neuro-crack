@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/lib/hooks/use-auth'
 
@@ -21,6 +21,7 @@ import {
   Brain,
   FileSpreadsheet,
 } from 'lucide-react'
+import dynamic from 'next/dynamic'
 
 // Import UI components
 import { Button } from '@/components/ui/button'
@@ -29,17 +30,19 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
 
+
+
 // Navigation items configuration
 const navigationItems = [
   { name: 'Dashboard', icon: Home, href: '/dashboard' },
-  { name: 'Create Exam', icon: FileQuestion, href: '/create-exam' },
-  { name: 'Create MCQ', icon: FileQuestion, href: '/create-quiz' },
-  { name: 'Create CQ', icon: FileQuestion, href: '/create-cq' },
-  { name: 'Create SAQ', icon: FileQuestion, href: '/create-saq' },
-  { name: 'Upload Quiz', icon: Upload, href: '/upload-quiz' },
+  { name: 'Create Exam', icon: FileQuestion, href: '/create-exam', roles: ['admin'] },
+  { name: 'Create MCQ', icon: FileQuestion, href: '/create-quiz', roles: ['admin'] },
+  { name: 'Create CQ', icon: FileQuestion, href: '/create-cq', roles: ['admin'] },
+  { name: 'Create SAQ', icon: FileQuestion, href: '/create-saq', roles: ['admin'] },
+  { name: 'Upload Quiz', icon: Upload, href: '/upload-quiz', roles: ['admin'] },
   { name: 'Teacher Profile', icon: UserCircle, href: '/profile' },
   { name: 'Settings', icon: Settings, href: '/settings' },
-  { name: 'Docs to Excel', icon: FileSpreadsheet, href: '/docs-to-excel' },
+  { name: 'Docs to Excel', icon: FileSpreadsheet, href: '/docs-to-excel', roles: ['admin'] },
 ]
 
 // Types
@@ -49,10 +52,18 @@ interface User {
   image?: string
 }
 
+interface NavigationItem {
+  name: string;
+  icon: React.ElementType;
+  href: string;
+  roles?: string[];
+}
+
 interface SidebarProps {
   user: User | null
   expanded?: boolean
   onLogout: () => void
+  userRole: string | null;
 }
 
 export default function DashboardLayout({
@@ -60,9 +71,17 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, isLoading, logout } = useAuth()
+  const { user, isAuthLoading, logout, isAuthenticated, role } = useAuth()
+  const router = useRouter()
   const [expanded, setExpanded] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    // Only run this check when the authentication status is fully resolved
+    if (!isAuthLoading && !isAuthenticated) {
+      router.replace('/login')
+    }
+  }, [isAuthLoading, isAuthenticated, router])
 
   useEffect(() => {
     const handleResize = () => {
@@ -75,7 +94,7 @@ export default function DashboardLayout({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="relative w-24 h-24">
@@ -88,6 +107,7 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-background">
+
       {/* Mobile Sidebar */}
       {isMobile && (
         <Sheet>
@@ -101,7 +121,7 @@ export default function DashboardLayout({
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-80 border-r shadow-2xl">
-            <MobileSidebar user={user} onLogout={logout} />
+            <MobileSidebar user={user} onLogout={logout} userRole={role} />
           </SheetContent>
         </Sheet>
       )}
@@ -118,6 +138,7 @@ export default function DashboardLayout({
             user={user}
             expanded={expanded}
             onLogout={logout}
+            userRole={role}
           />
         </aside>
       )}
@@ -158,7 +179,7 @@ export default function DashboardLayout({
 }
 
 // Desktop Sidebar Component
-function DesktopSidebar({ user, expanded, onLogout }: SidebarProps) {
+function DesktopSidebar({ user, expanded, onLogout, userRole }: SidebarProps) {
   const pathname = usePathname()
   
   return (
@@ -187,21 +208,24 @@ function DesktopSidebar({ user, expanded, onLogout }: SidebarProps) {
       </div>
 
       <nav className="flex-1 px-4">
-        {navigationItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 mb-2 rounded-xl transition-all",
-              "hover:bg-primary/10 hover:text-primary",
-              pathname === item.href && "bg-primary/10 text-primary",
-              expanded ? "justify-start" : "justify-center"
-            )}
-          >
-            <item.icon className="h-5 w-5" />
-            {expanded && <span>{item.name}</span>}
-          </Link>
-        ))}
+        {navigationItems.map((item) => {
+          const shouldRender = !item.roles || (userRole && item.roles.includes(userRole));
+          return shouldRender ? (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 mb-2 rounded-xl transition-all",
+                "hover:bg-primary/10 hover:text-primary",
+                pathname === item.href && "bg-primary/10 text-primary",
+                expanded ? "justify-start" : "justify-center"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              {expanded && <span>{item.name}</span>}
+            </Link>
+          ) : null;
+        })}
       </nav>
 
       <div className="px-4 mt-auto">
@@ -245,7 +269,7 @@ function DesktopSidebar({ user, expanded, onLogout }: SidebarProps) {
 }
 
 // Mobile Sidebar Component
-function MobileSidebar({ user, onLogout }: SidebarProps) {
+function MobileSidebar({ user, onLogout, userRole }: SidebarProps) {
   const pathname = usePathname()
   
   return (
@@ -265,20 +289,23 @@ function MobileSidebar({ user, onLogout }: SidebarProps) {
       <Separator className="mb-6" />
 
       <nav className="flex-1 px-4">
-        {navigationItems.map((item) => (
-          <Link
-            key={item.name}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 mb-2 rounded-xl transition-all",
-              "hover:bg-primary/10 hover:text-primary",
-              pathname === item.href && "bg-primary/10 text-primary"
-            )}
-          >
-            <item.icon className="h-5 w-5" />
-            <span>{item.name}</span>
-          </Link>
-        ))}
+        {navigationItems.map((item) => {
+          const shouldRender = !item.roles || (userRole && item.roles.includes(userRole));
+          return shouldRender ? (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                "flex items-center gap-3 px-4 py-3 mb-2 rounded-xl transition-all",
+                "hover:bg-primary/10 hover:text-primary",
+                pathname === item.href && "bg-primary/10 text-primary"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span>{item.name}</span>
+            </Link>
+          ) : null;
+        })}
       </nav>
 
       <Separator className="mt-6" />

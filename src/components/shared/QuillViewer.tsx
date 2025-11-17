@@ -2,13 +2,13 @@
 
 "use client";
 
-import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css';
-import { useEffect } from 'react';
+import React from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import DOMPurify from 'dompurify';
 
-// THIS IS THE ONLY SETUP NEEDED
 if (typeof window !== 'undefined') {
   (window as any).katex = katex;
 }
@@ -18,26 +18,16 @@ interface QuillViewerProps {
 }
 
 const QuillViewer: React.FC<QuillViewerProps> = ({ content }) => {
-  const { quill, quillRef } = useQuill({ 
-    modules: { 
-      toolbar: false,
-      formula: true // This will now work
-    },
-    formats: ['formula'],
-    readOnly: true
-  });
-
-  useEffect(() => {
-    if (quill) {
-      quill.clipboard.dangerouslyPasteHTML(content);
-      quill.disable();
-    }
-  }, [quill, content]);
+  const sanitizedContent = typeof window !== 'undefined' ? DOMPurify.sanitize(content) : content;
 
   return (
-    <div style={{ width: '100%' }}>
-      <div ref={quillRef} />
-    </div>
+    <ReactQuill
+      value={sanitizedContent}
+      readOnly={true}
+      theme="snow"
+      modules={{ toolbar: false, formula: true }}
+      formats={['formula']}
+    />
   );
 };
 
