@@ -250,15 +250,15 @@ function DesktopSidebar({ user, expanded, onLogout, userRole }: SidebarProps) {
         <div className={cn("flex items-center", expanded ? "justify-between" : "justify-center")}>
           <div className={cn("flex items-center", expanded ? "gap-3" : "")}>
             <Avatar className="h-10 w-10 border-2 border-primary/20">
-              <AvatarImage src="https://picsum.photos/200/300" />
+              <AvatarImage src={user?.image} />
               <AvatarFallback className="bg-primary/10 text-primary">
-                {user?.name?.[0]?.toUpperCase() || "MR"}
+                {user?.name?.[0]?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             {expanded && (
               <div className="flex-1 max-w-[160px]">
-                <p className="font-medium text-base truncate">Rakibur Rahman</p>
-                <p className="text-xs text-muted-foreground truncate">rakiburrahman780@gmail.com</p>
+                <p className="font-medium text-base truncate">{user?.name || 'User'}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email || 'user@example.com'}</p>
               </div>
             )}
           </div>
@@ -315,12 +315,12 @@ function MobileSidebar({ user, onLogout, userRole }: SidebarProps) {
           <Avatar className="h-12 w-12 border-2 border-primary/20">
             <AvatarImage src={user?.image} />
             <AvatarFallback className="bg-primary/10 text-primary">
-              {user?.name?.[0]?.toUpperCase()}
+              {user?.name?.[0]?.toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 overflow-hidden">
-            <p className="font-medium truncate">{user?.name}</p>
-            <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+            <p className="font-medium truncate">{user?.name || 'User'}</p>
+            <p className="text-sm text-muted-foreground truncate">{user?.email || 'user@example.com'}</p>
           </div>
         </div>
         <Button

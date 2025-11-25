@@ -16,7 +16,7 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Next Frontend",
-  description: "This is a Next.js frontend for a web application developed by Md. Rakibur Rahman",
+  description: "This is a Next.js frontend for a web application developed by Moaz",
   keywords: ["next.js", "react", "web development"],
 };
 

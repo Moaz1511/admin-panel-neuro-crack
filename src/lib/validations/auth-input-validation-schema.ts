@@ -1,8 +1,18 @@
 import * as z from "zod"
+import disposableDomains from 'disposable-email-domains';
 
+const emailNotInDisposable = z.string().email().refine(
+  (email) => {
+    const domain = email.split('@')[1];
+    return !disposableDomains.includes(domain);
+  },
+  {
+    message: "Disposable email addresses are not allowed",
+  }
+);
 export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email address"),
+  email: emailNotInDisposable,
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -19,7 +29,7 @@ export const registerSchema = z.object({
 export type RegisterInput = z.infer<typeof registerSchema>
 
 export const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  email: emailNotInDisposable,
   password: z.string().min(1, "Password is required"),
 })
 
