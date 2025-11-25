@@ -4,7 +4,7 @@ import { toast } from "sonner"
 import { AuthService } from "@/lib/services/auth-service"
 import type { VerifyOtpSchema } from "@/lib/validations/verify-otp-validation"
 import { AxiosError } from "axios"
-import { useAuthStore } from "@/lib/store/auth.store"
+import { useAuthStore } from "@/lib/store/auth-store"
 
 export function useVerifyOtp() {
   const router = useRouter()

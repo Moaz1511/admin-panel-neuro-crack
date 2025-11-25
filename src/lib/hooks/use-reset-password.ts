@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { AuthService } from "@/lib/services/auth-service"
-import { useAuthStore } from "@/lib/store/auth.store"
+import { useAuthStore } from "@/lib/store/auth-store"
 import type { ResetPasswordSchema } from "@/lib/validations/reset-password-validation"
 import { AxiosError } from "axios"
 

@@ -15,11 +15,18 @@ interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
   role: 'admin' | 'user' | null;
-  _hasHydrated: boolean; // <-- Add this
+  email: string | null; // <-- Merged
+  otp: string | null; // <-- Merged
+  _hasHydrated: boolean;
   setToken: (token: string) => void;
   setUser: (user: User) => void;
+  setEmail: (email: string) => void; // <-- Merged
+  setOtp: (otp: string) => void; // <-- Merged
   clearAuth: () => void;
-  setHasHydrated: (state: boolean) => void; // <-- Add this
+  clearEmail: () => void; // <-- Merged
+  clearOtp: () => void; // <-- Merged
+  clearAll: () => void; // <-- Merged
+  setHasHydrated: (state: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -29,19 +36,25 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       user: null,
       role: null,
-      _hasHydrated: false, // <-- Add this
+      email: null, // <-- Merged
+      otp: null, // <-- Merged
+      _hasHydrated: false,
       setToken: (token: string) => {
         const decodedToken: { role: 'admin' | 'user' } = jwtDecode(token);
         set({ token, isAuthenticated: true, role: decodedToken.role });
       },
       setUser: (user: User) => set({ user }),
+      setEmail: (email) => set({ email }), // <-- Merged
+      setOtp: (otp) => set({ otp }), // <-- Merged
       clearAuth: () => set({ token: null, isAuthenticated: false, user: null, role: null }),
-      setHasHydrated: (state: boolean) => set({ _hasHydrated: state }), // <-- Add this
+      clearEmail: () => set({ email: null }), // <-- Merged
+      clearOtp: () => set({ otp: null }), // <-- Merged
+      clearAll: () => set({ email: null, otp: null }), // <-- Merged
+      setHasHydrated: (state: boolean) => set({ _hasHydrated: state }),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
-      // Add this onRehydrateStorage callback
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
