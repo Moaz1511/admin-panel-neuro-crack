@@ -52,9 +52,9 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQues
             getRequest(`/api/saqs/topic/${topicId}`),
           ]);
           setAvailableQuestions({
-            mcq: mcqsRes.data.map((q: any) => ({ ...q, type: 'mcq' })),
-            cq: cqsRes.data.map((q: any) => ({ ...q, type: 'cq' })),
-            saq: saqsRes.data.map((q: any) => ({ ...q, type: 'saq' })),
+            mcq: mcqsRes.map((q: any) => ({ ...q, type: 'mcq' })),
+            cq: cqsRes.map((q: any) => ({ ...q, type: 'cq' })),
+            saq: saqsRes.map((q: any) => ({ ...q, type: 'saq' })),
           });
         } catch (error) {
           console.error('Error fetching questions:', error);

@@ -40,6 +40,7 @@ const navigationItems = [
   { name: 'Create CQ', icon: FileQuestion, href: '/create-cq', roles: ['admin'] },
   { name: 'Create SAQ', icon: FileQuestion, href: '/create-saq', roles: ['admin'] },
   { name: 'Upload Quiz', icon: Upload, href: '/upload-quiz', roles: ['admin'] },
+  { name: 'QAC', icon: Brain, href: '/qac', roles: ['admin'] },
   { name: 'Teacher Profile', icon: UserCircle, href: '/profile' },
   { name: 'Settings', icon: Settings, href: '/settings' },
   { name: 'Docs to Excel', icon: FileSpreadsheet, href: '/docs-to-excel', roles: ['admin'] },

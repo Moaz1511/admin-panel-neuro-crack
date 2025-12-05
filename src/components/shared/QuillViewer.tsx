@@ -14,11 +14,11 @@ if (typeof window !== 'undefined') {
 }
 
 interface QuillViewerProps {
-  content: string;
+  content: string | undefined | null;
 }
 
 const QuillViewer: React.FC<QuillViewerProps> = ({ content }) => {
-  const sanitizedContent = typeof window !== 'undefined' ? DOMPurify.sanitize(content) : content;
+  const sanitizedContent = typeof window !== 'undefined' ? DOMPurify.sanitize(content || '') : (content || '');
 
   return (
     <ReactQuill
