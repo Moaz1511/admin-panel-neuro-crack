@@ -39,32 +39,32 @@ interface Group { id: number; name: string; }
 interface Subject { id: number; name: string; }
 interface Chapter { id: number; name: string; }
 interface Topic { id: number; name: string; }
-interface Option {
+export interface Option {
   id: number;
   option_text: string;
   is_correct: boolean;
 }
 
-interface CQSubQuestion {
+export interface CQSubQuestion {
     id: number;
     cq_id: number;
     question_text: string;
     answer_text: string;
 }
 
-interface Explanation {
+export interface Explanation {
   id: number;
   question_id: number;
   explanation_text: string;
 }
 
-interface Hint {
+export interface Hint {
   id: number;
   question_id: number;
   hint_text: string;
 }
 
-interface Question {
+export interface Question {
   id: number;
   type: 'mcq' | 'cq' | 'saq';
   question_text?: string;
