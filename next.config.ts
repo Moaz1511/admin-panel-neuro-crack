@@ -76,9 +76,6 @@ const nextConfig: NextConfig = {
     '*.192.168.154.33'
   ],
   
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;
