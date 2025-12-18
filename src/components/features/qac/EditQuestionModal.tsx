@@ -57,39 +57,39 @@ const optionSchema = z.object({
 });
 
 const editSchema = z.object({
-  question_text: z.string().optional(),
-  uddipok: z.string().optional(),
+  question_text: z.string().optional().nullable(),
+  uddipok: z.string().optional().nullable(),
   question_image_type: z.enum(["link", "file"]).optional(),
-  question_image_link: z.string().optional(),
-  question_image_url: z.string().optional(),
+  question_image_link: z.string().optional().nullable(),
+  question_image_url: z.string().optional().nullable(),
   question_video_type: z.enum(["link", "file"]).optional(),
-  question_video_link: z.string().optional(),
-  question_video_url: z.string().optional(),
+  question_video_link: z.string().optional().nullable(),
+  question_video_url: z.string().optional().nullable(),
   question_audio_type: z.enum(["link", "file"]).optional(),
-  question_audio_link: z.string().optional(),
-  question_audio_url: z.string().optional(),
-  difficulty_level: z.string().optional(),
-  reference: z.string().optional(),
-  explanation: z.string().optional(),
+  question_audio_link: z.string().optional().nullable(),
+  question_audio_url: z.string().optional().nullable(),
+  difficulty_level: z.string().optional().nullable(),
+  reference: z.string().optional().nullable(),
+  explanation: z.string().optional().nullable(),
   explanation_image_type: z.enum(["link", "file"]).optional(),
-  explanation_image_link: z.string().optional(),
-  explanation_image_url: z.string().optional(),
+  explanation_image_link: z.string().optional().nullable(),
+  explanation_image_url: z.string().optional().nullable(),
   explanation_video_type: z.enum(["link", "file"]).optional(),
-  explanation_video_link: z.string().optional(),
-  explanation_video_url: z.string().optional(),
+  explanation_video_link: z.string().optional().nullable(),
+  explanation_video_url: z.string().optional().nullable(),
   explanation_audio_type: z.enum(["link", "file"]).optional(),
-  explanation_audio_link: z.string().optional(),
-  explanation_audio_url: z.string().optional(),
-  hint: z.string().optional(),
+  explanation_audio_link: z.string().optional().nullable(),
+  explanation_audio_url: z.string().optional().nullable(),
+  hint: z.string().optional().nullable(),
   hint_image_type: z.enum(["link", "file"]).optional(),
-  hint_image_link: z.string().optional(),
-  hint_image_url: z.string().optional(),
+  hint_image_link: z.string().optional().nullable(),
+  hint_image_url: z.string().optional().nullable(),
   hint_video_type: z.enum(["link", "file"]).optional(),
-  hint_video_link: z.string().optional(),
-  hint_video_url: z.string().optional(),
+  hint_video_link: z.string().optional().nullable(),
+  hint_video_url: z.string().optional().nullable(),
   hint_audio_type: z.enum(["link", "file"]).optional(),
-  hint_audio_link: z.string().optional(),
-  hint_audio_url: z.string().optional(),
+  hint_audio_link: z.string().optional().nullable(),
+  hint_audio_url: z.string().optional().nullable(),
   options: z.array(optionSchema).optional(),
   correctAnswerIndex: z.string().optional(),
 });
@@ -112,28 +112,23 @@ export function EditQuestionModal({
   });
 
     useEffect(() => {
-
       if (question) {
-
         const correctIndex = question.type === 'mcq' ? (question.options as QuestionOption[])?.findIndex(opt => opt.is_correct) : -1;
 
         methods.reset({
-
           ...question,
-
+          uddipok: question.uddipok || '',
           explanation: question.explanation?.[0]?.explanation_text || '',
-
           hint: question.hint?.[0]?.hint_text || '',
-
           options: question.type === 'mcq' ? (question.options as QuestionOption[]) : [],
-
           correctAnswerIndex: correctIndex !== -1 ? String(correctIndex) : undefined,
-
         });
 
+        if (question.question_image_link) {
+          methods.setValue('question_image_type', 'link');
+        }
       }
-
-    }, [question, methods]);
+    }, [question, methods, question?.id]);
 
   const handleFormSubmit = (data: EditFormValues) => {
     const { correctAnswerIndex, ...restData } = data;
@@ -143,12 +138,15 @@ export function EditQuestionModal({
     }));
 
     const saveData = {
-        ...question,
+        id: question?.id,
+        type: question?.type,
         ...restData,
         options: processedOptions,
-        explanation: data.explanation,
-        hint: data.hint,
+        explanation: data.explanation ? [{ explanation_text: data.explanation }] : [],
+        hint: data.hint ? [{ hint_text: data.hint }] : [],
+        question_image_link: data.question_image_link,
     };
+    delete (saveData as any).question_image_url;
     onSave(saveData);
     onClose();
   };
@@ -167,7 +165,7 @@ export function EditQuestionModal({
           </DialogDescription>
         </DialogHeader>
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(handleFormSubmit)} className="max-h-[80vh] overflow-y-auto p-1">
+          <form onSubmit={methods.handleSubmit(handleFormSubmit, (errors) => console.error(errors))} className="max-h-[80vh] overflow-y-auto p-1">
             <div className="space-y-6">
                 <Card>
                     <CardHeader><CardTitle>Question</CardTitle></CardHeader>
@@ -176,7 +174,16 @@ export function EditQuestionModal({
                             name={question.type === 'cq' ? 'uddipok' : 'question_text'}
                             control={methods.control}
                             render={({ field }) => (
-                                <NewQuillEditor onUpdate={field.onChange} content={field.value || ''} />
+                                <NewQuillEditor
+                                    onUpdate={(value) => {
+                                        if (typeof value === 'object' && value !== null) {
+                                            field.onChange(JSON.stringify(value));
+                                        } else {
+                                            field.onChange(value);
+                                        }
+                                    }}
+                                    content={field.value || ''}
+                                />
                             )}
                         />
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -248,7 +255,7 @@ export function EditQuestionModal({
                                     name="difficulty_level"
                                     control={methods.control}
                                     render={({ field }) => (
-                                        <Select onValueChange={field.onChange} value={field.value}>
+                                        <Select onValueChange={field.onChange} value={field.value ?? undefined}>
                                             <SelectTrigger><SelectValue placeholder="Select Difficulty" /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="Easy">Easy</SelectItem>
@@ -261,7 +268,13 @@ export function EditQuestionModal({
                             </div>
                             <div>
                                 <label htmlFor="reference" className="font-semibold">Reference</label>
-                                <Controller name="reference" control={methods.control} render={({ field }) => (<NewQuillEditor onUpdate={field.onChange} content={field.value || ''} />)} />
+                                <Controller name="reference" control={methods.control} render={({ field }) => (<NewQuillEditor onUpdate={(value) => {
+                                    if (typeof value === 'object' && value !== null) {
+                                        field.onChange(JSON.stringify(value));
+                                    } else {
+                                        field.onChange(value);
+                                    }
+                                }} content={field.value || ''} />)} />
                             </div>
                         </div>
                     </CardContent>
@@ -362,7 +375,13 @@ export function EditQuestionModal({
                     <CardContent className="space-y-4">
                         <div>
                             <label htmlFor="explanation" className="font-semibold">Explanation</label>
-                            <Controller name="explanation" control={methods.control} render={({ field }) => (<NewQuillEditor onUpdate={field.onChange} content={field.value || ''} />)} />
+                            <Controller name="explanation" control={methods.control} render={({ field }) => (<NewQuillEditor onUpdate={(value) => {
+                                if (typeof value === 'object' && value !== null) {
+                                    field.onChange(JSON.stringify(value));
+                                } else {
+                                    field.onChange(value);
+                                }
+                            }} content={field.value || ''} />)} />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
@@ -401,7 +420,13 @@ export function EditQuestionModal({
                         </div>
                         <div>
                             <label htmlFor="hint" className="font-semibold">Hint</label>
-                            <Controller name="hint" control={methods.control} render={({ field }) => (<NewQuillEditor onUpdate={field.onChange} content={field.value || ''} />)} />
+                            <Controller name="hint" control={methods.control} render={({ field }) => (<NewQuillEditor onUpdate={(value) => {
+                                if (typeof value === 'object' && value !== null) {
+                                    field.onChange(JSON.stringify(value));
+                                } else {
+                                    field.onChange(value);
+                                }
+                            }} content={field.value || ''} />)} />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>

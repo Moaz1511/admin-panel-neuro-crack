@@ -81,6 +81,9 @@ export interface Question {
   explanation?: Explanation[];
   hint?: Hint[];
   options?: Option[] | CQSubQuestion[];
+  question_image_link?: string;
+  question_video_link?: string;
+  question_audio_link?: string;
 }
 
 const qacSchema = z.object({
@@ -543,6 +546,9 @@ function QACPage() {
                   <div className="prose max-w-none">
                     <h3 className="text-lg font-semibold">{question.type === 'cq' ? 'Uddipok:' : 'Question:'}</h3>
                     <QuillViewer content={question.type === 'cq' ? question.uddipok : question.question_text} />
+                    {question.question_image_link && (
+                      <img src={question.question_image_link} alt="Question Image" className="mt-2 rounded-md max-w-sm" />
+                    )}
                   </div>
                   
                   {question.options && question.options.length > 0 && (
@@ -551,14 +557,21 @@ function QACPage() {
                       <div className="space-y-2">
                         {question.type === 'mcq' && (question.options as Option[]).map((option, index) => (
                           <div key={option.id} className={`p-2 rounded ${option.is_correct ? 'bg-green-100 border-green-300' : 'bg-gray-100'}`}>
-                            <p><strong>{index + 1}.</strong> <QuillViewer content={option.option_text} /></p>
+                            <div className="flex items-start">
+                              <strong className="mr-2">{index + 1}.</strong>
+                              <QuillViewer content={option.option_text} />
+                            </div>
                           </div>
                         ))}
                         {question.type === 'cq' && (question.options as CQSubQuestion[]).map((sub, index) => (
                           <div key={sub.id} className="p-2 bg-gray-100 rounded">
-                            <p><strong>{String.fromCharCode(97 + index)})</strong> <QuillViewer content={sub.question_text} /></p>
-                            <div className="pl-4 mt-1 border-l-2">
-                              <strong>Answer:</strong> <QuillViewer content={sub.answer_text} />
+                            <div className="flex items-start">
+                              <strong className="mr-2">{String.fromCharCode(97 + index)})</strong>
+                              <QuillViewer content={sub.question_text} />
+                            </div>
+                            <div className="pl-4 mt-1 border-l-2 flex items-start">
+                              <strong className="mr-2">Answer:</strong>
+                              <QuillViewer content={sub.answer_text} />
                             </div>
                           </div>
                         ))}

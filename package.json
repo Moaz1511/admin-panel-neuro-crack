@@ -65,6 +65,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/katex": "^0.16.7",
     "@types/node": "^20",
     "@types/quill": "^2.0.14",
     "@types/react": "^19",
