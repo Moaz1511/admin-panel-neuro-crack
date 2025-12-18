@@ -16,8 +16,8 @@ const QuillViewer: React.FC<QuillViewerProps> = ({ content }) => {
 
   const sanitizedContent = useMemo(() => {
     // Sanitize content to prevent XSS, but keep structure
-    return typeof window !== 'undefined' 
-      ? DOMPurify.sanitize(content || '') 
+    return typeof window !== 'undefined'
+      ? DOMPurify.sanitize(content || '')
       : (content || '');
   }, [content]);
 
@@ -45,9 +45,9 @@ const QuillViewer: React.FC<QuillViewerProps> = ({ content }) => {
     // We add 'ql-snow' and 'ql-editor' classes to mimic the exact look of ReactQuill
     // so it blends in perfectly with your other content.
     <div className="ql-snow">
-      <div 
+      <div
         ref={contentRef}
-        className="ql-editor" 
+        className="ql-editor"
         style={{ padding: 0 }} // Optional: removes editor padding if you want it compact
         dangerouslySetInnerHTML={{ __html: sanitizedContent }}
       />

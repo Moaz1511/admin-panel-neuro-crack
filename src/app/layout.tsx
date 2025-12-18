@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import 'katex/dist/katex.min.css';
@@ -12,6 +12,12 @@ const inter = Inter({
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-mono",
+});
+
+const hindSiliguri = Hind_Siliguri({
+  subsets: ["bengali", "latin"],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: "--font-hind-siliguri",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +35,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} ${jakarta.variable} min-h-screen bg-background font-sans antialiased`}>
+        className={`${inter.variable} ${jakarta.variable} ${hindSiliguri.variable} min-h-screen bg-background font-sans antialiased`}>
         <main className="relative flex min-h-screen flex-col">
           {children}
         </main>

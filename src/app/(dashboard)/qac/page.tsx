@@ -81,9 +81,9 @@ export interface Question {
   explanation?: Explanation[];
   hint?: Hint[];
   options?: Option[] | CQSubQuestion[];
-  question_image_link?: string;
-  question_video_link?: string;
-  question_audio_link?: string;
+  question_image_url?: string;
+  question_video_url?: string;
+  question_audio_url?: string;
 }
 
 const qacSchema = z.object({
@@ -101,6 +101,7 @@ const qacSchema = z.object({
 type QACFormValues = z.infer<typeof qacSchema>;
 
 import { EditQuestionModal } from '@/components/features/qac/EditQuestionModal';
+import { baseUrl } from '@/lib/api/api-endpoints';
 
 function QACPage() {
   const { register, handleSubmit, watch, setValue } = useForm<QACFormValues>({
@@ -510,7 +511,8 @@ function QACPage() {
         <div className="text-center py-10 text-gray-500">No questions found matching your criteria.</div>
       ) : (
         <div className="grid gap-4">
-          {questions.map((question) => (
+          {questions.map((question) => {
+            return (
             <Card key={`${question.type}-${question.id}`} className="p-4">
               <Collapsible defaultOpen>
                 <div className="flex items-start justify-between">
@@ -542,34 +544,34 @@ function QACPage() {
                     </CollapsibleTrigger>
                   </div>
                 </div>
-                <CollapsibleContent className="pt-4 space-y-4">
+                <CollapsibleContent className="pt-4 space-y-4 font-hind-siliguri">
                   <div className="prose max-w-none">
                     <h3 className="text-lg font-semibold">{question.type === 'cq' ? 'Uddipok:' : 'Question:'}</h3>
                     <QuillViewer content={question.type === 'cq' ? question.uddipok : question.question_text} />
-                    {question.question_image_link && (
-                      <img src={question.question_image_link} alt="Question Image" className="mt-2 rounded-md max-w-sm" />
+                    {question.question_image_url && (
+                      <img src={question.question_image_url} alt="Question Image" className="mt-2 rounded-md max-w-sm" />
                     )}
                   </div>
                   
                   {question.options && question.options.length > 0 && (
                     <div>
                       <h4 className="font-semibold">Options:</h4>
-                      <div className="space-y-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {question.type === 'mcq' && (question.options as Option[]).map((option, index) => (
                           <div key={option.id} className={`p-2 rounded ${option.is_correct ? 'bg-green-100 border-green-300' : 'bg-gray-100'}`}>
-                            <div className="flex items-start">
-                              <strong className="mr-2">{index + 1}.</strong>
+                            <div className="flex items-start prose">
+                              <strong className="mr-2">{String.fromCharCode(65 + index)}.</strong>
                               <QuillViewer content={option.option_text} />
                             </div>
                           </div>
                         ))}
                         {question.type === 'cq' && (question.options as CQSubQuestion[]).map((sub, index) => (
                           <div key={sub.id} className="p-2 bg-gray-100 rounded">
-                            <div className="flex items-start">
+                            <div className="flex items-start prose">
                               <strong className="mr-2">{String.fromCharCode(97 + index)})</strong>
                               <QuillViewer content={sub.question_text} />
                             </div>
-                            <div className="pl-4 mt-1 border-l-2 flex items-start">
+                            <div className="pl-4 mt-1 border-l-2 flex items-start prose">
                               <strong className="mr-2">Answer:</strong>
                               <QuillViewer content={sub.answer_text} />
                             </div>
@@ -580,21 +582,21 @@ function QACPage() {
                   )}
 
                   {question.explanation && question.explanation.length > 0 && (
-                    <div>
+                    <div className="prose">
                       <h4 className="font-semibold">Explanation:</h4>
                       <QuillViewer content={question.explanation[0].explanation_text} />
                     </div>
                   )}
 
                   {question.hint && question.hint.length > 0 && (
-                    <div>
+                    <div className="prose">
                       <h4 className="font-semibold">Hint:</h4>
                       <QuillViewer content={question.hint[0].hint_text} />
                     </div>
                   )}
                   
                   {question.reference && (
-                    <div>
+                    <div className="prose">
                       <h4 className="font-semibold">Reference:</h4>
                       <QuillViewer content={question.reference} />
                     </div>
@@ -608,7 +610,7 @@ function QACPage() {
                 </CollapsibleContent>
               </Collapsible>
             </Card>
-          ))}
+          )})}
         </div>
       )}
 

@@ -60,35 +60,26 @@ const editSchema = z.object({
   question_text: z.string().optional().nullable(),
   uddipok: z.string().optional().nullable(),
   question_image_type: z.enum(["link", "file"]).optional(),
-  question_image_link: z.string().optional().nullable(),
   question_image_url: z.string().optional().nullable(),
   question_video_type: z.enum(["link", "file"]).optional(),
-  question_video_link: z.string().optional().nullable(),
   question_video_url: z.string().optional().nullable(),
   question_audio_type: z.enum(["link", "file"]).optional(),
-  question_audio_link: z.string().optional().nullable(),
   question_audio_url: z.string().optional().nullable(),
   difficulty_level: z.string().optional().nullable(),
   reference: z.string().optional().nullable(),
   explanation: z.string().optional().nullable(),
   explanation_image_type: z.enum(["link", "file"]).optional(),
-  explanation_image_link: z.string().optional().nullable(),
   explanation_image_url: z.string().optional().nullable(),
   explanation_video_type: z.enum(["link", "file"]).optional(),
-  explanation_video_link: z.string().optional().nullable(),
   explanation_video_url: z.string().optional().nullable(),
   explanation_audio_type: z.enum(["link", "file"]).optional(),
-  explanation_audio_link: z.string().optional().nullable(),
   explanation_audio_url: z.string().optional().nullable(),
   hint: z.string().optional().nullable(),
   hint_image_type: z.enum(["link", "file"]).optional(),
-  hint_image_link: z.string().optional().nullable(),
   hint_image_url: z.string().optional().nullable(),
   hint_video_type: z.enum(["link", "file"]).optional(),
-  hint_video_link: z.string().optional().nullable(),
   hint_video_url: z.string().optional().nullable(),
   hint_audio_type: z.enum(["link", "file"]).optional(),
-  hint_audio_link: z.string().optional().nullable(),
   hint_audio_url: z.string().optional().nullable(),
   options: z.array(optionSchema).optional(),
   correctAnswerIndex: z.string().optional(),
@@ -122,13 +113,22 @@ export function EditQuestionModal({
           hint: question.hint?.[0]?.hint_text || '',
           options: question.type === 'mcq' ? (question.options as QuestionOption[]) : [],
           correctAnswerIndex: correctIndex !== -1 ? String(correctIndex) : undefined,
+          question_image_url: question.question_image_url,
+          question_video_url: question.question_video_url,
+          question_audio_url: question.question_audio_url,
         });
 
-        if (question.question_image_link) {
+        if (question.question_image_url) {
           methods.setValue('question_image_type', 'link');
         }
+        if (question.question_video_url) {
+          methods.setValue('question_video_type', 'link');
+        }
+        if (question.question_audio_url) {
+          methods.setValue('question_audio_type', 'link');
+        }
       }
-    }, [question, methods, question?.id]);
+    }, [question]);
 
   const handleFormSubmit = (data: EditFormValues) => {
     const { correctAnswerIndex, ...restData } = data;
@@ -144,9 +144,8 @@ export function EditQuestionModal({
         options: processedOptions,
         explanation: data.explanation ? [{ explanation_text: data.explanation }] : [],
         hint: data.hint ? [{ hint_text: data.hint }] : [],
-        question_image_link: data.question_image_link,
+        question_image_url: data.question_image_url,
     };
-    delete (saveData as any).question_image_url;
     onSave(saveData);
     onClose();
   };
@@ -198,7 +197,7 @@ export function EditQuestionModal({
                                     </SelectContent>
                                     </Select>
                                     {methods.watch(`question_image_type`) === 'link' && (
-                                    <Input {...methods.register(`question_image_link`)} placeholder="Image Link" />
+                                    <Input {...methods.register(`question_image_url`)} placeholder="Image Link" />
                                     )}
                                     {methods.watch(`question_image_type`) === 'file' && (
                                     <Input type="file" {...methods.register(`question_image_url`)} />
@@ -216,7 +215,7 @@ export function EditQuestionModal({
                                     </SelectContent>
                                     </Select>
                                     {methods.watch(`question_video_type`) === 'link' && (
-                                    <Input {...methods.register(`question_video_link`)} placeholder="Video Link" />
+                                    <Input {...methods.register(`question_video_url`)} placeholder="Video Link" />
                                     )}
                                     {methods.watch(`question_video_type`) === 'file' && (
                                     <Input type="file" {...methods.register(`question_video_url`)} />
@@ -234,7 +233,7 @@ export function EditQuestionModal({
                                     </SelectContent>
                                     </Select>
                                     {methods.watch(`question_audio_type`) === 'link' && (
-                                    <Input {...methods.register(`question_audio_link`)} placeholder="Audio Link" />
+                                    <Input {...methods.register(`question_audio_url`)} placeholder="Audio Link" />
                                     )}
                                     {methods.watch(`question_audio_type`) === 'file' && (
                                     <Input type="file" {...methods.register(`question_audio_url`)} />
@@ -391,7 +390,7 @@ export function EditQuestionModal({
                                         <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
                                         <SelectContent><SelectItem value="link">Link</SelectItem><SelectItem value="file">File</SelectItem></SelectContent>
                                     </Select>
-                                    {methods.watch(`explanation_image_type`) === 'link' && (<Input {...methods.register(`explanation_image_link`)} placeholder="Image Link" />)}
+                                    {methods.watch(`explanation_image_type`) === 'link' && (<Input {...methods.register(`explanation_image_url`)} placeholder="Image Link" />)}
                                     {methods.watch(`explanation_image_type`) === 'file' && (<Input type="file" {...methods.register(`explanation_image_url`)} />)}
                                 </div>
                             </div>
@@ -402,7 +401,7 @@ export function EditQuestionModal({
                                         <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
                                         <SelectContent><SelectItem value="link">Link</SelectItem><SelectItem value="file">File</SelectItem></SelectContent>
                                     </Select>
-                                    {methods.watch(`explanation_video_type`) === 'link' && (<Input {...methods.register(`explanation_video_link`)} placeholder="Video Link" />)}
+                                    {methods.watch(`explanation_video_type`) === 'link' && (<Input {...methods.register(`explanation_video_url`)} placeholder="Video Link" />)}
                                     {methods.watch(`explanation_video_type`) === 'file' && (<Input type="file" {...methods.register(`explanation_video_url`)} />)}
                                 </div>
                             </div>
@@ -413,7 +412,7 @@ export function EditQuestionModal({
                                         <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
                                         <SelectContent><SelectItem value="link">Link</SelectItem><SelectItem value="file">File</SelectItem></SelectContent>
                                     </Select>
-                                    {methods.watch(`explanation_audio_type`) === 'link' && (<Input {...methods.register(`explanation_audio_link`)} placeholder="Audio Link" />)}
+                                    {methods.watch(`explanation_audio_type`) === 'link' && (<Input {...methods.register(`explanation_audio_url`)} placeholder="Audio Link" />)}
                                     {methods.watch(`explanation_audio_type`) === 'file' && (<Input type="file" {...methods.register(`explanation_audio_url`)} />)}
                                 </div>
                             </div>
@@ -436,7 +435,7 @@ export function EditQuestionModal({
                                         <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
                                         <SelectContent><SelectItem value="link">Link</SelectItem><SelectItem value="file">File</SelectItem></SelectContent>
                                     </Select>
-                                    {methods.watch(`hint_image_type`) === 'link' && (<Input {...methods.register(`hint_image_link`)} placeholder="Image Link" />)}
+                                    {methods.watch(`hint_image_type`) === 'link' && (<Input {...methods.register(`hint_image_url`)} placeholder="Image Link" />)}
                                     {methods.watch(`hint_image_type`) === 'file' && (<Input type="file" {...methods.register(`hint_image_url`)} />)}
                                 </div>
                             </div>
@@ -447,7 +446,7 @@ export function EditQuestionModal({
                                         <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
                                         <SelectContent><SelectItem value="link">Link</SelectItem><SelectItem value="file">File</SelectItem></SelectContent>
                                     </Select>
-                                    {methods.watch(`hint_video_type`) === 'link' && (<Input {...methods.register(`hint_video_link`)} placeholder="Video Link" />)}
+                                    {methods.watch(`hint_video_type`) === 'link' && (<Input {...methods.register(`hint_video_url`)} placeholder="Video Link" />)}
                                     {methods.watch(`hint_video_type`) === 'file' && (<Input type="file" {...methods.register(`hint_video_url`)} />)}
                                 </div>
                             </div>
@@ -458,7 +457,7 @@ export function EditQuestionModal({
                                         <SelectTrigger><SelectValue placeholder="Type" /></SelectTrigger>
                                         <SelectContent><SelectItem value="link">Link</SelectItem><SelectItem value="file">File</SelectItem></SelectContent>
                                     </Select>
-                                    {methods.watch(`hint_audio_type`) === 'link' && (<Input {...methods.register(`hint_audio_link`)} placeholder="Audio Link" />)}
+                                    {methods.watch(`hint_audio_type`) === 'link' && (<Input {...methods.register(`hint_audio_url`)} placeholder="Audio Link" />)}
                                     {methods.watch(`hint_audio_type`) === 'file' && (<Input type="file" {...methods.register(`hint_audio_url`)} />)}
                                 </div>
                             </div>
