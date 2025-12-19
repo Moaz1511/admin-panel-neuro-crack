@@ -17,8 +17,11 @@ const QuillViewer: React.FC<QuillViewerProps> = ({ content }) => {
   const sanitizedContent = useMemo(() => {
     // Sanitize content to prevent XSS, but keep structure
     return typeof window !== 'undefined'
-      ? DOMPurify.sanitize(content || '')
-      : (content || '');
+      ? DOMPurify.sanitize(content || '', {
+          ADD_TAGS: ['img'],
+          ADD_ATTR: ['src'],
+        })
+      : content || '';
   }, [content]);
 
   useEffect(() => {

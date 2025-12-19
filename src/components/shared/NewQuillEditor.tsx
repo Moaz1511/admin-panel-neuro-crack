@@ -25,7 +25,7 @@ const NewQuillEditor: React.FC<NewQuillEditorProps> = ({ content, onUpdate }) =>
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['link', 'image', 'video'],
+      ['link', 'video'],
       ['formula'],
       ['clean']
     ],

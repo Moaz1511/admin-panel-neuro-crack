@@ -43,6 +43,9 @@ export interface Option {
   id: number;
   option_text: string;
   is_correct: boolean;
+  option_image_url?: string;
+  option_video_url?: string;
+  option_audio_url?: string;
 }
 
 export interface CQSubQuestion {
@@ -50,18 +53,25 @@ export interface CQSubQuestion {
     cq_id: number;
     question_text: string;
     answer_text: string;
+    cq_sub_question_image_url?: string;
 }
 
 export interface Explanation {
   id: number;
   question_id: number;
   explanation_text: string;
+  explanation_image_url?: string;
+  explanation_video_url?: string;
+  explanation_audio_url?: string;
 }
 
 export interface Hint {
   id: number;
   question_id: number;
   hint_text: string;
+  hint_image_url?: string;
+  hint_video_url?: string;
+  hint_audio_url?: string;
 }
 
 export interface Question {
@@ -84,6 +94,12 @@ export interface Question {
   question_image_url?: string;
   question_video_url?: string;
   question_audio_url?: string;
+}
+
+export interface QacLog {
+    action: string;
+    timestamp: string;
+    user_name: string;
 }
 
 const qacSchema = z.object({
@@ -125,6 +141,32 @@ function QACPage() {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [hasUserSearched, setHasUserSearched] = useState(false); // New state to track if a search has been performed
+  const [qacLogs, setQacLogs] = useState<QacLog[]>([]);
+  const [selectedQuestionForLogs, setSelectedQuestionForLogs] = useState<Question | null>(null);
+  const [logsLoading, setLogsLoading] = useState(false);
+
+  const fetchQacLogs = async (question: Question) => {
+    if (selectedQuestionForLogs?.id === question.id) {
+        setSelectedQuestionForLogs(null);
+        setQacLogs([]);
+        return;
+    }
+    setLogsLoading(true);
+    setSelectedQuestionForLogs(question);
+    try {
+        const res = await getRequest<{ data: QacLog[] }>(`/api/qac-logs/${question.id}/${question.type}`);
+        if (res && res.data) {
+            setQacLogs(res.data);
+        } else {
+            setQacLogs([]);
+        }
+    } catch (error) {
+        toast.error('Failed to fetch QAC logs.');
+        console.error('Error fetching QAC logs:', error);
+    } finally {
+        setLogsLoading(false);
+    }
+  };
 
 
   // Watch form values for dynamic filtering
@@ -328,65 +370,66 @@ function QACPage() {
     }
   }, [page, hasUserSearched]);
 
-  const handleQACToggle = async (question: Question) => {
-    try {
-      const updatedQuestion = await patchRequest(`/api/questions/status/${question.id}`, {
-        qacStatus: !question.is_qac,
-        type: question.type,
-      });
-      setQuestions(prevQuestions =>
-        prevQuestions.map(q =>
-          q.id === question.id && q.type === question.type
-            ? { ...q, is_qac: !q.is_qac }
-            : q
-        )
-      );
-      toast.success('QAC status updated successfully!');
-    } catch (error) {
-      toast.error('Failed to update QAC status.');
-      console.error('Error updating QAC status:', error);
-    }
-  };
+    const handleQACToggle = async (question: Question) => {
+        const newQacStatus = !question.is_qac;
+        try {
+            await patchRequest(`/api/questions/status/${question.id}`, {
+                qacStatus: newQacStatus,
+                type: question.type,
+            });
+            setQuestions(prev =>
+                prev.map(q =>
+                    q.id === question.id && q.type === question.type
+                        ? { ...q, is_qac: newQacStatus }
+                        : q
+                )
+            );
+            toast.success(`Question marked as ${newQacStatus ? "QAC'd" : "Un-QAC'd"}.`);
+        } catch (error) {
+            toast.error('Failed to update QAC status.');
+            console.error('Error updating QAC status:', error);
+        }
+    };
 
-  const handleDeleteQuestion = async (question: Question) => {
-    if (!confirm('Are you sure you want to delete this question?')) return;
-    try {
-      await deleteRequest(`/api/questions/${question.id}?type=${question.type}`); // You might need to adjust this endpoint to handle different types
-      setQuestions(prevQuestions => prevQuestions.filter(q => !(q.id === question.id && q.type === question.type)));
-      toast.success('Question deleted successfully!');
-    } catch (error) {
-      toast.error('Failed to delete question.');
-      console.error('Error deleting question:', error);
-    }
-  };
+    const handleDeleteQuestion = async (question: Question) => {
+        if (window.confirm('Are you sure you want to delete this question?')) {
+            try {
+                await deleteRequest(`/api/questions/${question.id}?type=${question.type}`);
+                setQuestions(prev => prev.filter(q => q.id !== question.id || q.type !== question.type));
+                toast.success('Question deleted successfully.');
+            } catch (error) {
+                toast.error('Failed to delete question.');
+                console.error(error);
+            }
+        }
+    };
 
   // Implement handleEditQuestion (e.g., open a modal for editing)
-  const handleEditQuestion = (question: Question) => {
-    setEditingQuestion(question);
-    setIsEditModalOpen(true);
-  };
+    const handleEditQuestion = (question: Question) => {
+        if (question.type !== 'mcq') {
+            alert('Only MCQ questions can be edited at the moment.');
+            return;
+        }
+        setEditingQuestion(question);
+        setIsEditModalOpen(true);
+    };
 
-  const handleSaveQuestion = async (updatedQuestion: any) => {
-    try {
-      // NOTE: The backend API for updating questions needs to be implemented
-      // This is a placeholder for the actual API call
-      console.log("Saving updated question:", updatedQuestion);
-      await putRequest(`/api/questions/${updatedQuestion.id}`, updatedQuestion);
+    const handleSaveQuestion = async (updatedQuestion: any) => {
+        try {
+            const response = await putRequest(`/api/questions/${updatedQuestion.id}`, updatedQuestion);
+            
+            // Assuming the API returns the updated question data
+            const savedQuestion = (response as any).data; 
 
-      // Update the local state to reflect the changes immediately
-      setQuestions(prevQuestions =>
-        prevQuestions.map(q =>
-          q.id === updatedQuestion.id && q.type === updatedQuestion.type
-            ? { ...q, ...updatedQuestion }
-            : q
-        )
-      );
-      toast.success('Question updated successfully!');
-    } catch (error) {
-      toast.error('Failed to update question.');
-      console.error('Error updating question:', error);
-    }
-  };
+            setQuestions(prev => prev.map(q => q.id === savedQuestion.id && q.type === savedQuestion.type ? savedQuestion : q));
+            toast.success('Question updated successfully!');
+            setIsEditModalOpen(false); // Close modal on save
+            setEditingQuestion(null); // Clear editing state
+        } catch (error) {
+            toast.error('Failed to update question.');
+            console.error('Error updating question:', error);
+        }
+    };
 
 
   return (
@@ -535,7 +578,7 @@ function QACPage() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                     <CollapsibleTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" onClick={() => fetchQacLogs(question)}>
                         {/* You might want a better icon for expand/collapse */}
                         <ChevronDown className="h-4 w-4 data-[state=open]:hidden" />
                         <ChevronUp className="h-4 w-4 data-[state=closed]:hidden" />
@@ -563,6 +606,9 @@ function QACPage() {
                               <strong className="mr-2">{String.fromCharCode(65 + index)}.</strong>
                               <QuillViewer content={option.option_text} />
                             </div>
+                            {option.option_image_url && (
+                              <img src={option.option_image_url} alt={`Option ${index + 1} Image`} className="mt-2 rounded-md max-w-xs" />
+                            )}
                           </div>
                         ))}
                         {question.type === 'cq' && (question.options as CQSubQuestion[]).map((sub, index) => (
@@ -575,6 +621,9 @@ function QACPage() {
                               <strong className="mr-2">Answer:</strong>
                               <QuillViewer content={sub.answer_text} />
                             </div>
+                            {sub.cq_sub_question_image_url && (
+                                <img src={sub.cq_sub_question_image_url} alt={`Sub-question ${index + 1} Image`} className="mt-2 rounded-md max-w-xs" />
+                            )}
                           </div>
                         ))}
                       </div>
@@ -585,6 +634,9 @@ function QACPage() {
                     <div className="prose">
                       <h4 className="font-semibold">Explanation:</h4>
                       <QuillViewer content={question.explanation[0].explanation_text} />
+                      {question.explanation[0].explanation_image_url && (
+                        <img src={question.explanation[0].explanation_image_url} alt="Explanation Image" className="mt-2 rounded-md max-w-xs" />
+                      )}
                     </div>
                   )}
 
@@ -592,6 +644,9 @@ function QACPage() {
                     <div className="prose">
                       <h4 className="font-semibold">Hint:</h4>
                       <QuillViewer content={question.hint[0].hint_text} />
+                      {question.hint[0].hint_image_url && (
+                        <img src={question.hint[0].hint_image_url} alt="Hint Image" className="mt-2 rounded-md max-w-xs" />
+                      )}
                     </div>
                   )}
                   
@@ -601,6 +656,37 @@ function QACPage() {
                       <QuillViewer content={question.reference} />
                     </div>
                   )}
+
+                  {selectedQuestionForLogs?.id === question.id && (
+                    <div>
+                        <h4 className="font-semibold">QAC Logs:</h4>
+                        {logsLoading ? (
+                            <p>Loading logs...</p>
+                        ) : qacLogs.length > 0 ? (
+                            <table className="w-full text-sm text-left text-gray-500">
+                                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-6 py-3">User</th>
+                                        <th scope="col" className="px-6 py-3">Action</th>
+                                        <th scope="col" className="px-6 py-3">Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {qacLogs.map((log, index) => (
+                                        <tr key={index} className="bg-white border-b">
+                                            <td className="px-6 py-4">{log.user_name}</td>
+                                            <td className="px-6 py-4">{log.action}</td>
+                                            <td className="px-6 py-4">{new Date(log.timestamp).toLocaleString()}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        ) : (
+                            <p>No QAC logs found for this question.</p>
+                        )}
+                    </div>
+                  )}
+
                   {question.difficulty_level && (
                     <p className="text-sm"><strong>Difficulty:</strong> {question.difficulty_level}</p>
                   )}

@@ -46,13 +46,13 @@ const optionSchema = z.object({
     option_text: z.string().min(1, "Option text cannot be empty"),
     is_correct: z.boolean(),
     image_type: z.enum(["link", "file"]).optional(),
-    image_link: z.string().optional(),
+    option_image_url: z.string().optional(),
     image_file: z.any().optional(),
     video_type: z.enum(["link", "file"]).optional(),
-    video_link: z.string().optional(),
+    option_video_url: z.string().optional(),
     video_file: z.any().optional(),
     audio_type: z.enum(["link", "file"]).optional(),
-    audio_link: z.string().optional(),
+    option_audio_url: z.string().optional(),
     audio_file: z.any().optional(),
 });
 
@@ -103,6 +103,12 @@ export function EditQuestionModal({
   });
 
     useEffect(() => {
+        if (!isOpen) {
+            methods.reset();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
       if (question) {
         const correctIndex = question.type === 'mcq' ? (question.options as QuestionOption[])?.findIndex(opt => opt.is_correct) : -1;
 
@@ -116,6 +122,12 @@ export function EditQuestionModal({
           question_image_url: question.question_image_url,
           question_video_url: question.question_video_url,
           question_audio_url: question.question_audio_url,
+          explanation_image_url: question.explanation?.[0]?.explanation_image_url,
+          explanation_video_url: question.explanation?.[0]?.explanation_video_url,
+          explanation_audio_url: question.explanation?.[0]?.explanation_audio_url,
+          hint_image_url: question.hint?.[0]?.hint_image_url,
+          hint_video_url: question.hint?.[0]?.hint_video_url,
+          hint_audio_url: question.hint?.[0]?.hint_audio_url,
         });
 
         if (question.question_image_url) {
@@ -127,8 +139,42 @@ export function EditQuestionModal({
         if (question.question_audio_url) {
           methods.setValue('question_audio_type', 'link');
         }
+
+        if (question.explanation?.[0]?.explanation_image_url) {
+          methods.setValue('explanation_image_type', 'link');
+        }
+        if (question.explanation?.[0]?.explanation_video_url) {
+          methods.setValue('explanation_video_type', 'link');
+        }
+        if (question.explanation?.[0]?.explanation_audio_url) {
+          methods.setValue('explanation_audio_type', 'link');
+        }
+
+        if (question.hint?.[0]?.hint_image_url) {
+          methods.setValue('hint_image_type', 'link');
+        }
+        if (question.hint?.[0]?.hint_video_url) {
+          methods.setValue('hint_video_type', 'link');
+        }
+        if (question.hint?.[0]?.hint_audio_url) {
+          methods.setValue('hint_audio_type', 'link');
+        }
+
+        if (question.type === 'mcq') {
+          (question.options as QuestionOption[]).forEach((option, index) => {
+            if (option.option_image_url) {
+              methods.setValue(`options.${index}.image_type`, 'link');
+            }
+            if (option.option_video_url) {
+                methods.setValue(`options.${index}.video_type`, 'link');
+            }
+            if (option.option_audio_url) {
+                methods.setValue(`options.${index}.audio_type`, 'link');
+            }
+          });
+        }
       }
-    }, [question]);
+    }, [question, isOpen]);
 
   const handleFormSubmit = (data: EditFormValues) => {
     const { correctAnswerIndex, ...restData } = data;
@@ -142,8 +188,18 @@ export function EditQuestionModal({
         type: question?.type,
         ...restData,
         options: processedOptions,
-        explanation: data.explanation ? [{ explanation_text: data.explanation }] : [],
-        hint: data.hint ? [{ hint_text: data.hint }] : [],
+        explanation: data.explanation ? [{ 
+            explanation_text: data.explanation,
+            explanation_image_url: data.explanation_image_url,
+            explanation_video_url: data.explanation_video_url,
+            explanation_audio_url: data.explanation_audio_url,
+        }] : [],
+        hint: data.hint ? [{ 
+            hint_text: data.hint,
+            hint_image_url: data.hint_image_url,
+            hint_video_url: data.hint_video_url,
+            hint_audio_url: data.hint_audio_url,
+        }] : [],
         question_image_url: data.question_image_url,
     };
     onSave(saveData);
@@ -315,7 +371,7 @@ export function EditQuestionModal({
                                                     </SelectContent>
                                                 </Select>
                                                 {methods.watch(`options.${index}.image_type`) === 'link' && (
-                                                    <Input {...methods.register(`options.${index}.image_link`)} placeholder="Image Link" />
+                                                    <Input {...methods.register(`options.${index}.option_image_url`)} placeholder="Image Link" />
                                                 )}
                                                 {methods.watch(`options.${index}.image_type`) === 'file' && (
                                                     <Input type="file" {...methods.register(`options.${index}.image_file`)} />
@@ -333,7 +389,7 @@ export function EditQuestionModal({
                                                     </SelectContent>
                                                 </Select>
                                                 {methods.watch(`options.${index}.video_type`) === 'link' && (
-                                                    <Input {...methods.register(`options.${index}.video_link`)} placeholder="Video Link" />
+                                                    <Input {...methods.register(`options.${index}.option_video_url`)} placeholder="Video Link" />
                                                 )}
                                                 {methods.watch(`options.${index}.video_type`) === 'file' && (
                                                     <Input type="file" {...methods.register(`options.${index}.video_file`)} />
@@ -351,7 +407,7 @@ export function EditQuestionModal({
                                                     </SelectContent>
                                                 </Select>
                                                 {methods.watch(`options.${index}.audio_type`) === 'link' && (
-                                                    <Input {...methods.register(`options.${index}.audio_link`)} placeholder="Audio Link" />
+                                                    <Input {...methods.register(`options.${index}.option_audio_url`)} placeholder="Audio Link" />
                                                 )}
                                                 {methods.watch(`options.${index}.audio_type`) === 'file' && (
                                                     <Input type="file" {...methods.register(`options.${index}.audio_file`)} />
