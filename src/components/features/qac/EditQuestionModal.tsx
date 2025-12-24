@@ -182,48 +182,89 @@ export function EditQuestionModal({
         const questionType = question?.type || 'mcq'; // Get context from question type
 
         let questionImageUrl = data.question_image_url;
-        if (data.question_image_type === 'file' && data.question_image_url instanceof FileList && data.question_image_url.length > 0) {
-            questionImageUrl = await uploadService.uploadFile(data.question_image_url[0], questionType);
+        if (data.question_image_type === 'file') {
+             if (data.question_image_url && data.question_image_url.length > 0 && data.question_image_url[0]) {
+                questionImageUrl = await uploadService.uploadFile(data.question_image_url[0], questionType);
+             } else {
+                // If type is file but no file selected, keeping the old value might be risky if the user intended to clear it, 
+                // but usually in this UI flow it implies replacing. 
+                // However, if the field value is NOT a string (i.e. it's a FileList), we shouldn't send it.
+                if (typeof data.question_image_url !== 'string') {
+                    questionImageUrl = null; // Or undefined, to not update? But here we overwrite.
+                }
+             }
         }
         
         let questionVideoUrl = data.question_video_url;
-        if (data.question_video_type === 'file' && data.question_video_url instanceof FileList && data.question_video_url.length > 0) {
-            questionVideoUrl = await uploadService.uploadFile(data.question_video_url[0], questionType);
+        if (data.question_video_type === 'file') {
+             if (data.question_video_url && data.question_video_url.length > 0 && data.question_video_url[0]) {
+                questionVideoUrl = await uploadService.uploadFile(data.question_video_url[0], questionType);
+             } else if (typeof data.question_video_url !== 'string') {
+                 questionVideoUrl = null;
+             }
         }
 
         let questionAudioUrl = data.question_audio_url;
-        if (data.question_audio_type === 'file' && data.question_audio_url instanceof FileList && data.question_audio_url.length > 0) {
-            questionAudioUrl = await uploadService.uploadFile(data.question_audio_url[0], questionType);
+         if (data.question_audio_type === 'file') {
+             if (data.question_audio_url && data.question_audio_url.length > 0 && data.question_audio_url[0]) {
+                questionAudioUrl = await uploadService.uploadFile(data.question_audio_url[0], questionType);
+             } else if (typeof data.question_audio_url !== 'string') {
+                 questionAudioUrl = null;
+             }
         }
 
         let explanationImageUrl = data.explanation_image_url;
-        if (data.explanation_image_type === 'file' && data.explanation_image_url instanceof FileList && data.explanation_image_url.length > 0) {
-             explanationImageUrl = await uploadService.uploadFile(data.explanation_image_url[0], questionType);
+         if (data.explanation_image_type === 'file') {
+             if (data.explanation_image_url && data.explanation_image_url.length > 0 && data.explanation_image_url[0]) {
+                explanationImageUrl = await uploadService.uploadFile(data.explanation_image_url[0], questionType);
+             } else if (typeof data.explanation_image_url !== 'string') {
+                 explanationImageUrl = null;
+             }
         }
 
         let explanationVideoUrl = data.explanation_video_url;
-        if (data.explanation_video_type === 'file' && data.explanation_video_url instanceof FileList && data.explanation_video_url.length > 0) {
-             explanationVideoUrl = await uploadService.uploadFile(data.explanation_video_url[0], questionType);
+         if (data.explanation_video_type === 'file') {
+             if (data.explanation_video_url && data.explanation_video_url.length > 0 && data.explanation_video_url[0]) {
+                explanationVideoUrl = await uploadService.uploadFile(data.explanation_video_url[0], questionType);
+             } else if (typeof data.explanation_video_url !== 'string') {
+                 explanationVideoUrl = null;
+             }
         }
 
         let explanationAudioUrl = data.explanation_audio_url;
-        if (data.explanation_audio_type === 'file' && data.explanation_audio_url instanceof FileList && data.explanation_audio_url.length > 0) {
-             explanationAudioUrl = await uploadService.uploadFile(data.explanation_audio_url[0], questionType);
+         if (data.explanation_audio_type === 'file') {
+             if (data.explanation_audio_url && data.explanation_audio_url.length > 0 && data.explanation_audio_url[0]) {
+                explanationAudioUrl = await uploadService.uploadFile(data.explanation_audio_url[0], questionType);
+             } else if (typeof data.explanation_audio_url !== 'string') {
+                 explanationAudioUrl = null;
+             }
         }
 
         let hintImageUrl = data.hint_image_url;
-        if (data.hint_image_type === 'file' && data.hint_image_url instanceof FileList && data.hint_image_url.length > 0) {
-             hintImageUrl = await uploadService.uploadFile(data.hint_image_url[0], questionType);
+         if (data.hint_image_type === 'file') {
+             if (data.hint_image_url && data.hint_image_url.length > 0 && data.hint_image_url[0]) {
+                hintImageUrl = await uploadService.uploadFile(data.hint_image_url[0], questionType);
+             } else if (typeof data.hint_image_url !== 'string') {
+                 hintImageUrl = null;
+             }
         }
 
         let hintVideoUrl = data.hint_video_url;
-        if (data.hint_video_type === 'file' && data.hint_video_url instanceof FileList && data.hint_video_url.length > 0) {
-             hintVideoUrl = await uploadService.uploadFile(data.hint_video_url[0], questionType);
+         if (data.hint_video_type === 'file') {
+             if (data.hint_video_url && data.hint_video_url.length > 0 && data.hint_video_url[0]) {
+                hintVideoUrl = await uploadService.uploadFile(data.hint_video_url[0], questionType);
+             } else if (typeof data.hint_video_url !== 'string') {
+                 hintVideoUrl = null;
+             }
         }
 
         let hintAudioUrl = data.hint_audio_url;
-        if (data.hint_audio_type === 'file' && data.hint_audio_url instanceof FileList && data.hint_audio_url.length > 0) {
-             hintAudioUrl = await uploadService.uploadFile(data.hint_audio_url[0], questionType);
+         if (data.hint_audio_type === 'file') {
+             if (data.hint_audio_url && data.hint_audio_url.length > 0 && data.hint_audio_url[0]) {
+                hintAudioUrl = await uploadService.uploadFile(data.hint_audio_url[0], questionType);
+             } else if (typeof data.hint_audio_url !== 'string') {
+                 hintAudioUrl = null;
+             }
         }
 
 
@@ -232,19 +273,31 @@ export function EditQuestionModal({
         // Process options to upload files if needed
         const processedOptions = await Promise.all(data.options?.map(async (opt, index) => {
             let optionImageUrl = opt.option_image_url;
-            if (opt.image_type === 'file' && opt.image_file instanceof FileList && opt.image_file.length > 0) {
-                optionImageUrl = await uploadService.uploadFile(opt.image_file[0], questionType);
-            }
+             if (opt.image_type === 'file') {
+                if (opt.image_file && opt.image_file.length > 0 && opt.image_file[0]) {
+                    optionImageUrl = await uploadService.uploadFile(opt.image_file[0], questionType);
+                } else if (typeof opt.image_file !== 'string') {
+                    optionImageUrl = null;
+                }
+             }
 
             let optionVideoUrl = opt.option_video_url;
-            if (opt.video_type === 'file' && opt.video_file instanceof FileList && opt.video_file.length > 0) {
-                optionVideoUrl = await uploadService.uploadFile(opt.video_file[0], questionType);
-            }
+             if (opt.video_type === 'file') {
+                if (opt.video_file && opt.video_file.length > 0 && opt.video_file[0]) {
+                    optionVideoUrl = await uploadService.uploadFile(opt.video_file[0], questionType);
+                } else if (typeof opt.video_file !== 'string') {
+                    optionVideoUrl = null;
+                }
+             }
 
             let optionAudioUrl = opt.option_audio_url;
-            if (opt.audio_type === 'file' && opt.audio_file instanceof FileList && opt.audio_file.length > 0) {
-                optionAudioUrl = await uploadService.uploadFile(opt.audio_file[0], questionType);
-            }
+             if (opt.audio_type === 'file') {
+                if (opt.audio_file && opt.audio_file.length > 0 && opt.audio_file[0]) {
+                    optionAudioUrl = await uploadService.uploadFile(opt.audio_file[0], questionType);
+                } else if (typeof opt.audio_file !== 'string') {
+                    optionAudioUrl = null;
+                }
+             }
 
             return {
                 ...opt,
@@ -260,6 +313,15 @@ export function EditQuestionModal({
             type: question?.type,
             topic_id: question?.topic_id,
             ...restData,
+            question_image_url: questionImageUrl,
+            question_video_url: questionVideoUrl,
+            question_audio_url: questionAudioUrl,
+            explanation_image_url: explanationImageUrl,
+            explanation_video_url: explanationVideoUrl,
+            explanation_audio_url: explanationAudioUrl,
+            hint_image_url: hintImageUrl,
+            hint_video_url: hintVideoUrl,
+            hint_audio_url: hintAudioUrl,
             options: processedOptions,
             explanation: data.explanation ? [{ 
                 explanation_text: data.explanation,
@@ -273,9 +335,6 @@ export function EditQuestionModal({
                 hint_video_url: hintVideoUrl,
                 hint_audio_url: hintAudioUrl,
             }] : [],
-            question_image_url: questionImageUrl,
-            question_video_url: questionVideoUrl,
-            question_audio_url: questionAudioUrl,
         };
         onSave(saveData);
         onClose();
