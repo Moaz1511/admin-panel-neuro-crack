@@ -28,6 +28,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { uploadService } from '@/lib/api/services/uploadService';
 
 const NewQuillEditor = dynamic(
   () => import('@/components/shared/NewQuillEditor'),
@@ -43,16 +44,16 @@ interface EditQuestionModalProps {
 
 const optionSchema = z.object({
     id: z.number().optional(),
-    option_text: z.string().min(1, "Option text cannot be empty"),
+    option_text: z.string().optional().or(z.literal('')),
     is_correct: z.boolean(),
     image_type: z.enum(["link", "file"]).optional(),
-    option_image_url: z.string().optional(),
+    option_image_url: z.string().optional().nullable(),
     image_file: z.any().optional(),
     video_type: z.enum(["link", "file"]).optional(),
-    option_video_url: z.string().optional(),
+    option_video_url: z.string().optional().nullable(),
     video_file: z.any().optional(),
     audio_type: z.enum(["link", "file"]).optional(),
-    option_audio_url: z.string().optional(),
+    option_audio_url: z.string().optional().nullable(),
     audio_file: z.any().optional(),
 });
 
@@ -60,27 +61,27 @@ const editSchema = z.object({
   question_text: z.string().optional().nullable(),
   uddipok: z.string().optional().nullable(),
   question_image_type: z.enum(["link", "file"]).optional(),
-  question_image_url: z.string().optional().nullable(),
+  question_image_url: z.union([z.string(), z.any()]).optional().nullable(),
   question_video_type: z.enum(["link", "file"]).optional(),
-  question_video_url: z.string().optional().nullable(),
+  question_video_url: z.union([z.string(), z.any()]).optional().nullable(),
   question_audio_type: z.enum(["link", "file"]).optional(),
-  question_audio_url: z.string().optional().nullable(),
+  question_audio_url: z.union([z.string(), z.any()]).optional().nullable(),
   difficulty_level: z.string().optional().nullable(),
   reference: z.string().optional().nullable(),
   explanation: z.string().optional().nullable(),
   explanation_image_type: z.enum(["link", "file"]).optional(),
-  explanation_image_url: z.string().optional().nullable(),
+  explanation_image_url: z.union([z.string(), z.any()]).optional().nullable(),
   explanation_video_type: z.enum(["link", "file"]).optional(),
-  explanation_video_url: z.string().optional().nullable(),
+  explanation_video_url: z.union([z.string(), z.any()]).optional().nullable(),
   explanation_audio_type: z.enum(["link", "file"]).optional(),
-  explanation_audio_url: z.string().optional().nullable(),
+  explanation_audio_url: z.union([z.string(), z.any()]).optional().nullable(),
   hint: z.string().optional().nullable(),
   hint_image_type: z.enum(["link", "file"]).optional(),
-  hint_image_url: z.string().optional().nullable(),
+  hint_image_url: z.union([z.string(), z.any()]).optional().nullable(),
   hint_video_type: z.enum(["link", "file"]).optional(),
-  hint_video_url: z.string().optional().nullable(),
+  hint_video_url: z.union([z.string(), z.any()]).optional().nullable(),
   hint_audio_type: z.enum(["link", "file"]).optional(),
-  hint_audio_url: z.string().optional().nullable(),
+  hint_audio_url: z.union([z.string(), z.any()]).optional().nullable(),
   options: z.array(optionSchema).optional(),
   correctAnswerIndex: z.string().optional(),
 });
@@ -176,34 +177,112 @@ export function EditQuestionModal({
       }
     }, [question, isOpen]);
 
-  const handleFormSubmit = (data: EditFormValues) => {
-    const { correctAnswerIndex, ...restData } = data;
-    const processedOptions = data.options?.map((opt, index) => ({
-        ...opt,
-        is_correct: String(index) === correctAnswerIndex,
-    }));
+  const handleFormSubmit = async (data: EditFormValues) => {
+    try {
+        const questionType = question?.type || 'mcq'; // Get context from question type
 
-    const saveData = {
-        id: question?.id,
-        type: question?.type,
-        ...restData,
-        options: processedOptions,
-        explanation: data.explanation ? [{ 
-            explanation_text: data.explanation,
-            explanation_image_url: data.explanation_image_url,
-            explanation_video_url: data.explanation_video_url,
-            explanation_audio_url: data.explanation_audio_url,
-        }] : [],
-        hint: data.hint ? [{ 
-            hint_text: data.hint,
-            hint_image_url: data.hint_image_url,
-            hint_video_url: data.hint_video_url,
-            hint_audio_url: data.hint_audio_url,
-        }] : [],
-        question_image_url: data.question_image_url,
-    };
-    onSave(saveData);
-    onClose();
+        let questionImageUrl = data.question_image_url;
+        if (data.question_image_type === 'file' && data.question_image_url instanceof FileList && data.question_image_url.length > 0) {
+            questionImageUrl = await uploadService.uploadFile(data.question_image_url[0], questionType);
+        }
+        
+        let questionVideoUrl = data.question_video_url;
+        if (data.question_video_type === 'file' && data.question_video_url instanceof FileList && data.question_video_url.length > 0) {
+            questionVideoUrl = await uploadService.uploadFile(data.question_video_url[0], questionType);
+        }
+
+        let questionAudioUrl = data.question_audio_url;
+        if (data.question_audio_type === 'file' && data.question_audio_url instanceof FileList && data.question_audio_url.length > 0) {
+            questionAudioUrl = await uploadService.uploadFile(data.question_audio_url[0], questionType);
+        }
+
+        let explanationImageUrl = data.explanation_image_url;
+        if (data.explanation_image_type === 'file' && data.explanation_image_url instanceof FileList && data.explanation_image_url.length > 0) {
+             explanationImageUrl = await uploadService.uploadFile(data.explanation_image_url[0], questionType);
+        }
+
+        let explanationVideoUrl = data.explanation_video_url;
+        if (data.explanation_video_type === 'file' && data.explanation_video_url instanceof FileList && data.explanation_video_url.length > 0) {
+             explanationVideoUrl = await uploadService.uploadFile(data.explanation_video_url[0], questionType);
+        }
+
+        let explanationAudioUrl = data.explanation_audio_url;
+        if (data.explanation_audio_type === 'file' && data.explanation_audio_url instanceof FileList && data.explanation_audio_url.length > 0) {
+             explanationAudioUrl = await uploadService.uploadFile(data.explanation_audio_url[0], questionType);
+        }
+
+        let hintImageUrl = data.hint_image_url;
+        if (data.hint_image_type === 'file' && data.hint_image_url instanceof FileList && data.hint_image_url.length > 0) {
+             hintImageUrl = await uploadService.uploadFile(data.hint_image_url[0], questionType);
+        }
+
+        let hintVideoUrl = data.hint_video_url;
+        if (data.hint_video_type === 'file' && data.hint_video_url instanceof FileList && data.hint_video_url.length > 0) {
+             hintVideoUrl = await uploadService.uploadFile(data.hint_video_url[0], questionType);
+        }
+
+        let hintAudioUrl = data.hint_audio_url;
+        if (data.hint_audio_type === 'file' && data.hint_audio_url instanceof FileList && data.hint_audio_url.length > 0) {
+             hintAudioUrl = await uploadService.uploadFile(data.hint_audio_url[0], questionType);
+        }
+
+
+        const { correctAnswerIndex, ...restData } = data;
+        
+        // Process options to upload files if needed
+        const processedOptions = await Promise.all(data.options?.map(async (opt, index) => {
+            let optionImageUrl = opt.option_image_url;
+            if (opt.image_type === 'file' && opt.image_file instanceof FileList && opt.image_file.length > 0) {
+                optionImageUrl = await uploadService.uploadFile(opt.image_file[0], questionType);
+            }
+
+            let optionVideoUrl = opt.option_video_url;
+            if (opt.video_type === 'file' && opt.video_file instanceof FileList && opt.video_file.length > 0) {
+                optionVideoUrl = await uploadService.uploadFile(opt.video_file[0], questionType);
+            }
+
+            let optionAudioUrl = opt.option_audio_url;
+            if (opt.audio_type === 'file' && opt.audio_file instanceof FileList && opt.audio_file.length > 0) {
+                optionAudioUrl = await uploadService.uploadFile(opt.audio_file[0], questionType);
+            }
+
+            return {
+                ...opt,
+                is_correct: String(index) === correctAnswerIndex,
+                option_image_url: optionImageUrl,
+                option_video_url: optionVideoUrl,
+                option_audio_url: optionAudioUrl,
+            };
+        }) || []);
+
+        const saveData = {
+            id: question?.id,
+            type: question?.type,
+            topic_id: question?.topic_id,
+            ...restData,
+            options: processedOptions,
+            explanation: data.explanation ? [{ 
+                explanation_text: data.explanation,
+                explanation_image_url: explanationImageUrl,
+                explanation_video_url: explanationVideoUrl,
+                explanation_audio_url: explanationAudioUrl,
+            }] : [],
+            hint: data.hint ? [{ 
+                hint_text: data.hint,
+                hint_image_url: hintImageUrl,
+                hint_video_url: hintVideoUrl,
+                hint_audio_url: hintAudioUrl,
+            }] : [],
+            question_image_url: questionImageUrl,
+            question_video_url: questionVideoUrl,
+            question_audio_url: questionAudioUrl,
+        };
+        onSave(saveData);
+        onClose();
+    } catch (error) {
+        console.error("Error preparing form data:", error);
+        // You might want to show a toast here
+    }
   };
 
   if (!question) {
@@ -220,7 +299,7 @@ export function EditQuestionModal({
           </DialogDescription>
         </DialogHeader>
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(handleFormSubmit, (errors) => console.error(errors))} className="max-h-[80vh] overflow-y-auto p-1">
+          <form onSubmit={methods.handleSubmit(handleFormSubmit, (errors) => console.error("Validation Errors:", errors))} className="max-h-[80vh] overflow-y-auto p-1">
             <div className="space-y-6">
                 <Card>
                     <CardHeader><CardTitle>Question</CardTitle></CardHeader>

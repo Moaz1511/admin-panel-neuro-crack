@@ -80,6 +80,7 @@ export interface Question {
   question_text?: string;
   uddipok?: string;
   is_qac: boolean;
+  topic_id: number;
   topic_name: string;
   chapter_name: string;
   subject_name: string;
@@ -416,12 +417,23 @@ function QACPage() {
 
     const handleSaveQuestion = async (updatedQuestion: any) => {
         try {
+            console.log('Saving question payload:', updatedQuestion);
             const response = await putRequest(`/api/questions/${updatedQuestion.id}`, updatedQuestion);
+            console.log('Update response:', JSON.stringify(response, null, 2));
             
-            // Assuming the API returns the updated question data
-            const savedQuestion = (response as any).data; 
+            // The backend might return the question object directly or wrapped in { data: ... }
+            let savedQuestion = response as any;
+            if (savedQuestion && !savedQuestion.id && savedQuestion.data) {
+                savedQuestion = savedQuestion.data;
+            }
 
-            setQuestions(prev => prev.map(q => q.id === savedQuestion.id && q.type === savedQuestion.type ? savedQuestion : q));
+            if (!savedQuestion || !savedQuestion.id) {
+                console.error("Invalid response format from update API:", JSON.stringify(response, null, 2));
+                toast.error("Failed to update question: Invalid server response.");
+                return;
+            }
+
+            setQuestions(prev => prev.map(q => (q.id === savedQuestion.id && q.type === savedQuestion.type) ? savedQuestion : q));
             toast.success('Question updated successfully!');
             setIsEditModalOpen(false); // Close modal on save
             setEditingQuestion(null); // Clear editing state
@@ -600,7 +612,9 @@ function QACPage() {
                     <div>
                       <h4 className="font-semibold">Options:</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {question.type === 'mcq' && (question.options as Option[]).map((option, index) => (
+                        {question.type === 'mcq' && (question.options as Option[]).map((option, index) => {
+                          if (!option) return null;
+                          return (
                           <div key={option.id} className={`p-2 rounded ${option.is_correct ? 'bg-green-100 border-green-300' : 'bg-gray-100'}`}>
                             <div className="flex items-start prose">
                               <strong className="mr-2">{String.fromCharCode(65 + index)}.</strong>
@@ -610,8 +624,10 @@ function QACPage() {
                               <img src={option.option_image_url} alt={`Option ${index + 1} Image`} className="mt-2 rounded-md max-w-xs" />
                             )}
                           </div>
-                        ))}
-                        {question.type === 'cq' && (question.options as CQSubQuestion[]).map((sub, index) => (
+                        )})}
+                        {question.type === 'cq' && (question.options as CQSubQuestion[]).map((sub, index) => {
+                          if (!sub) return null;
+                          return (
                           <div key={sub.id} className="p-2 bg-gray-100 rounded">
                             <div className="flex items-start prose">
                               <strong className="mr-2">{String.fromCharCode(97 + index)})</strong>
@@ -625,7 +641,7 @@ function QACPage() {
                                 <img src={sub.cq_sub_question_image_url} alt={`Sub-question ${index + 1} Image`} className="mt-2 rounded-md max-w-xs" />
                             )}
                           </div>
-                        ))}
+                        )})}
                       </div>
                     </div>
                   )}

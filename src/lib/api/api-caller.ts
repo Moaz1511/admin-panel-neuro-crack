@@ -105,7 +105,10 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 // ...
 
 axiosInstance.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    console.log(`[Axios Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+    return response.data;
+  },
   async <T>(error: AxiosError<ApiResponse<T>>) => {
     const originalRequest = error.config as CustomAxiosRequestConfig;
     const errorCode = error.response?.data?.error?.code

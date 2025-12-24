@@ -63,6 +63,7 @@ const nextConfig: NextConfig = {
     '192.168.0.101',
     '192.168.154.33', 
     'http://ai.neurocrack.com',
+    'admin.neurocrack.com',
     // Allow requests with different protocols and ports
     'http://localhost:3000',
     'http://localhost:5000',
