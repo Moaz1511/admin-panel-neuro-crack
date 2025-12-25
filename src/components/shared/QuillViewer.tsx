@@ -47,7 +47,7 @@ const QuillViewer: React.FC<QuillViewerProps> = ({ content }) => {
   return (
     // We add 'ql-snow' and 'ql-editor' classes to mimic the exact look of ReactQuill
     // so it blends in perfectly with your other content.
-    <div className="ql-snow">
+    <div className="ql-snow quill-viewer-container">
       <div
         ref={contentRef}
         className="ql-editor"
