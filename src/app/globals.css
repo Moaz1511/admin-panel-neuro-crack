@@ -128,4 +128,23 @@
   .font-hind-siliguri {
     font-family: var(--font-hind-siliguri);
   }
+  
+  /* Remove scrollbars and auto-expand height ONLY for Quill viewers */
+  .quill-viewer-container .ql-editor {
+    overflow-y: hidden !important;
+    height: auto !important;
+    min-height: unset !important;
+    padding: 0 !important;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    word-break: break-word;
+  }
+
+  .quill-viewer-container .ql-editor::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .quill-viewer-container .ql-container.ql-snow {
+    border: none !important;
+  }
 }
