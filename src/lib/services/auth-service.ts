@@ -55,9 +55,15 @@ export class AuthService {
   /**
    * Logout user
    */
-  static logout(): void {
-    useAuthStore.getState().clearAuth()
-    // The refresh token cookie will be cleared by the backend
+  static async logout(): Promise<void> {
+    try {
+      await postRequest(ApiEndpoints.auth.logout, {});
+    } catch (error) {
+      console.error("Logout API call failed", error);
+    } finally {
+      // Always clear local state even if API fails
+      useAuthStore.getState().clearAuth()
+    }
   }
 
   /**

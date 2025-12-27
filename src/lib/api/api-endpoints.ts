@@ -14,7 +14,8 @@ export const ApiEndpoints = {
     forgotPassword: `${baseUrl}/auth/forgot-password`,
     resetPassword: `${baseUrl}/auth/update-password`,
     profile: `${baseUrl}/auth/profile`,
-    verifyOtp: `${baseUrl}/auth/verify-otp`
+    verifyOtp: `${baseUrl}/auth/verify-otp`,
+    logout: `${baseUrl}/auth/logout`
   },
 
   classes: {
