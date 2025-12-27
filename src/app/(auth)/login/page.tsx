@@ -10,10 +10,20 @@ import Link from "next/link"
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { AppConstants } from "@/lib/utils/app-constants";
 
 export default function LoginPage() {
-  const { isAuthLoading } = useAuth()
+  const { isAuthLoading, isAuthenticated } = useAuth()
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace(AppConstants.routes.home);
+    }
+  }, [isAuthenticated, router]);
 
   if (isAuthLoading) {
     return (

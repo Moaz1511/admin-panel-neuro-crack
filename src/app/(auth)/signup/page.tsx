@@ -9,10 +9,30 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useAuth } from '@/lib/hooks/use-auth'
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { AppConstants } from "@/lib/utils/app-constants";
 
 export default function SignUpPage() {
+  const { isAuthLoading, isAuthenticated } = useAuth()
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace(AppConstants.routes.home);
+    }
+  }, [isAuthenticated, router]);
+
+  if (isAuthLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-950">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="relative min-h-svh w-full bg-gray-950">
