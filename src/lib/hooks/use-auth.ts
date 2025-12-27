@@ -61,20 +61,16 @@ export function useAuth() {
    * Log in a user
    */
   const login = async (data: LoginData): Promise<LoginResponse> => {
-    console.log("useAuth.login called");
     try {
       setIsApiLoading(true);
       const response = await AuthService.login(data);
       setIsApiLoading(false);
 
       if (response.success && response.data?.accessToken) {
-        console.log("Login successful, setting token and user");
         setToken(response.data.accessToken);
         setUser(response.data.user); 
         toast.success("Login successful!");
-        console.log("Redirecting to dashboard");
         router.replace(AppConstants.routes.home);
-        console.log("Redirected to dashboard");
       }
 
       return response;

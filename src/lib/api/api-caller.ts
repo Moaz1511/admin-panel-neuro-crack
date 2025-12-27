@@ -4,8 +4,7 @@ import { AppConstants } from '@/lib/utils/app-constants'
 import { baseUrl } from './api-endpoints'
 import { useAuthStore } from '../store/auth-store'
 
-// Log current environment (this will help verify)
-console.log('Current NODE_ENV:', process.env.NODE_ENV)
+
 
 interface ApiResponse<T> {
   success: boolean
@@ -30,23 +29,17 @@ export const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== 'undefined') {
-      console.log("--- NEW AXIOS INTERCEPTOR ---"); // <-- New log
-      
       // 1. Try to get the token from the "live" Zustand state
       let token = useAuthStore.getState().token;
-      console.log("1. Token from Zustand state:", token);
 
       // 2. If the state token is null, try localStorage fallback
       if (!token) {
-        console.log("2. Zustand token is null, trying localStorage fallback...");
         const authStorage = localStorage.getItem('auth-storage');
-        console.log("3. Raw auth-storage from localStorage:", authStorage);
         
         if (authStorage) {
           try {
             const { state } = JSON.parse(authStorage);
             token = state.token; // Get token from parsed state
-            console.log("4. Token from localStorage parse:", token);
           } catch (e) {
             console.error("Could not parse auth-storage from localStorage", e);
           }
@@ -57,8 +50,6 @@ axiosInstance.interceptors.request.use(
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      
-      console.log("5. Final Authorization Header:", config.headers.Authorization);
     }
     return config;
   },
@@ -106,7 +97,7 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log(`[Axios Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+
     return response.data;
   },
   async <T>(error: AxiosError<ApiResponse<T>>) => {
@@ -160,7 +151,6 @@ axiosInstance.interceptors.response.use(
 // Request helpers
 export const getRequest = async <T>(url: string): Promise<T> => {
   try {
-    console.log(`Making GET request to: ${url}`);
     return await axiosInstance.get(url)
   } catch (error) {
     throw error
