@@ -43,7 +43,7 @@ export function SignUpFormActions({ children }: SignUpFormActionsProps) {
         name: validatedData.name,
         email: validatedData.email,
         password: validatedData.password,
-        role: "USER"
+        role: "user"
       })
 
       // Clear form and show verification dialog

@@ -6,7 +6,7 @@ export interface User {
   id: string
   email: string
   name: string
-  role: string
+  role: 'admin' | 'user' | 'QAC'
   // Add other user fields as needed
 }
 
@@ -18,7 +18,7 @@ export interface RegisterData {
   email: string
   password: string
   name: string
-  role: string
+  role: 'admin' | 'user' | 'QAC'
   // Add other registration fields as needed
 }
 
