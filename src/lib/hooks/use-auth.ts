@@ -87,11 +87,20 @@ export function useAuth() {
   /**
    * Log out the current user
    */
-  const logout = () => {
-    AuthService.logout();
-    clearAuth();
-    toast.info("Logged out successfully!");
-    router.replace(AppConstants.routes.login);
+  const logout = async () => {
+    try {
+      setIsApiLoading(true);
+      await AuthService.logout();
+      clearAuth(); // Should already be cleared by service, but double check
+      toast.info("Logged out successfully!");
+      router.replace(AppConstants.routes.login);
+    } catch (error) {
+       // Force logout on UI even if backend fails
+       clearAuth();
+       router.replace(AppConstants.routes.login);
+    } finally {
+      setIsApiLoading(false);
+    }
   };
 
   return {
