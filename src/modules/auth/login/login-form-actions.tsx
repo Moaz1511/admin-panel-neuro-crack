@@ -24,7 +24,6 @@ export function LoginFormActions({ children }: LoginFormActionsProps) {
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    console.log("Submitting login form");
 
     try {
       const formData = new FormData(event.currentTarget)
