@@ -68,5 +68,14 @@ export const ApiEndpoints = {
   },
   ai: {
     uploadDocx: `${baseUrl}/api/ai/upload-docx`,
+  },
+  mediaManager: {
+    files: `${baseUrl}/api/media-manager/files`,
+    folder: `${baseUrl}/api/media-manager/folder`,
+    file: `${baseUrl}/api/media-manager/file`,
+    fileRename: `${baseUrl}/api/media-manager/file/rename`,
+    signedUrlUpload: `${baseUrl}/api/media-manager/signed-url/upload`,
+    signedUrlReplace: `${baseUrl}/api/media-manager/signed-url/replace`,
+    exportCsv: `${baseUrl}/api/media-manager/export-csv`,
   }
 } 

@@ -18,34 +18,35 @@ import {
   UserCircle,
   Settings,
   LogOut,
-  Brain,
-  FileSpreadsheet,
-} from 'lucide-react'
-import dynamic from 'next/dynamic'
-
-// Import UI components
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
-
-
-
-// Navigation items configuration
-const navigationItems = [
-  { name: 'Dashboard', icon: Home, href: '/dashboard' },
-  { name: 'Create Exam', icon: FileQuestion, href: '/create-exam', roles: ['admin'] },
-  { name: 'Create MCQ', icon: FileQuestion, href: '/create-quiz', roles: ['admin'] },
-  { name: 'Create CQ', icon: FileQuestion, href: '/create-cq', roles: ['admin'] },
-  { name: 'Create SAQ', icon: FileQuestion, href: '/create-saq', roles: ['admin'] },
-  { name: 'Upload Quiz', icon: Upload, href: '/upload-quiz', roles: ['admin'] },
-  { name: 'QAC', icon: Brain, href: '/qac', roles: ['admin', 'QAC'] },
-      { name: 'Users Profile', icon: UserCircle, href: '/users-profiles' },
-  { name: 'Settings', icon: Settings, href: '/settings' },
-  { name: 'Docs to Excel', icon: FileSpreadsheet, href: '/docs-to-excel', roles: ['admin'] },
-]
-
+    Brain,
+    FileSpreadsheet,
+    Image as ImageIcon,
+  } from 'lucide-react'
+  import dynamic from 'next/dynamic'
+  
+  // Import UI components
+  import { Button } from '@/components/ui/button'
+  import { Input } from '@/components/ui/input'
+  import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+  import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+  import { Separator } from '@/components/ui/separator'
+  
+  
+  
+  // Navigation items configuration
+  const navigationItems = [
+    { name: 'Dashboard', icon: Home, href: '/dashboard' },
+    { name: 'Create Exam', icon: FileQuestion, href: '/create-exam', roles: ['admin'] },
+    { name: 'Create MCQ', icon: FileQuestion, href: '/create-quiz', roles: ['admin'] },
+    { name: 'Create CQ', icon: FileQuestion, href: '/create-cq', roles: ['admin'] },
+    { name: 'Create SAQ', icon: FileQuestion, href: '/create-saq', roles: ['admin'] },
+    { name: 'Upload Quiz', icon: Upload, href: '/upload-quiz', roles: ['admin'] },
+    { name: 'Media Manager', icon: ImageIcon, href: '/media-manager', roles: ['admin'] },
+    { name: 'QAC', icon: Brain, href: '/qac', roles: ['admin', 'QAC'] },
+    { name: 'Users Profile', icon: UserCircle, href: '/users-profiles' },
+    { name: 'Settings', icon: Settings, href: '/settings' },
+    { name: 'Docs to Excel', icon: FileSpreadsheet, href: '/docs-to-excel', roles: ['admin'] },
+  ]
 // Types
 interface User {
   name: string

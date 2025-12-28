@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
         hostname: 'ui-avatars.com',
         port: '',
         pathname: '/api/**', // Allows images from ui-avatars.com
+      },
+      {
+        protocol: 'https',
+        hostname: 'assets.neurocrack.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
