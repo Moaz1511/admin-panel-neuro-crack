@@ -43,7 +43,7 @@ interface EditQuestionModalProps {
 }
 
 const optionSchema = z.object({
-    id: z.number().optional(),
+    id: z.string().optional(),
     option_text: z.string().optional().or(z.literal('')),
     is_correct: z.boolean(),
     image_type: z.enum(["link", "file"]).optional(),

@@ -33,14 +33,14 @@ interface ApiResponse<T> {
 }
 
 // Define types for your data
-interface Program { id: number; name: string; }
-interface Class { id: number; name: string; }
-interface Group { id: number; name: string; }
-interface Subject { id: number; name: string; }
-interface Chapter { id: number; name: string; }
-interface Topic { id: number; name: string; }
+interface Program { id: string; name: string; }
+interface Class { id: string; name: string; }
+interface Group { id: string; name: string; }
+interface Subject { id: string; name: string; }
+interface Chapter { id: string; name: string; }
+interface Topic { id: string; name: string; }
 export interface Option {
-  id: number;
+  id: string;
   option_text: string;
   is_correct: boolean;
   option_image_url?: string;
@@ -49,16 +49,16 @@ export interface Option {
 }
 
 export interface CQSubQuestion {
-    id: number;
-    cq_id: number;
+    id: string;
+    cq_id: string;
     question_text: string;
     answer_text: string;
     cq_sub_question_image_url?: string;
 }
 
 export interface Explanation {
-  id: number;
-  question_id: number;
+  id: string;
+  question_id: string;
   explanation_text: string;
   explanation_image_url?: string;
   explanation_video_url?: string;
@@ -66,8 +66,8 @@ export interface Explanation {
 }
 
 export interface Hint {
-  id: number;
-  question_id: number;
+  id: string;
+  question_id: string;
   hint_text: string;
   hint_image_url?: string;
   hint_video_url?: string;
@@ -75,12 +75,12 @@ export interface Hint {
 }
 
 export interface Question {
-  id: number;
+  id: string;
   type: 'mcq' | 'cq' | 'saq';
   question_text?: string;
   uddipok?: string;
   is_qac: boolean;
-  topic_id: number;
+  topic_id: string;
   topic_name: string;
   chapter_name: string;
   subject_name: string;

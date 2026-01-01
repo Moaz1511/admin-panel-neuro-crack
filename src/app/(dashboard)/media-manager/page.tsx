@@ -46,6 +46,8 @@ function MediaManagerPage() {
     onConfirm: () => {},
   });
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const openDialog = (title: string, description: string, onConfirm: () => void) => {
     setDialogState({ isOpen: true, title, description, onConfirm });
@@ -63,11 +65,11 @@ function MediaManagerPage() {
 
   useEffect(() => {
     fetchFilesAndFolders();
-  }, [currentPrefix]);
+  }, [currentPrefix, sortBy, sortOrder]);
 
   const fetchFilesAndFolders = async () => {
     try {
-      const response: any = await axiosInstance.get(`${ApiEndpoints.mediaManager.files}?prefix=${currentPrefix}`);
+      const response: any = await axiosInstance.get(`${ApiEndpoints.mediaManager.files}?prefix=${currentPrefix}&sortBy=${sortBy}&order=${sortOrder}`);
       setFiles(response.files);
       setFolders(response.folders);
     } catch (error) {
@@ -241,7 +243,20 @@ function MediaManagerPage() {
                 <Share className="mr-2 h-4 w-4" /> Export Links (CSV)
               </Button>
             </div>
-            <div>
+            <div className="flex items-center gap-2">
+              <select 
+                className="border rounded p-1 text-sm bg-background"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="name">Name</option>
+                <option value="date">Date</option>
+                <option value="size">Size</option>
+              </select>
+              <Button variant="ghost" size="sm" onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}>
+                {sortOrder === 'asc' ? 'Asc' : 'Desc'}
+              </Button>
+              <div className="h-4 w-[1px] bg-gray-300 mx-1"></div>
               <Button variant="ghost" size="sm" onClick={() => setViewMode('list')}>
                 <List className="h-4 w-4" />
               </Button>
@@ -379,7 +394,7 @@ function MediaManagerPage() {
                         {file.name}
                       </a>
                     </TableCell>
-                    <TableCell>{new Date(file.lastModified).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(file.lastModified).toLocaleString()}</TableCell>
                     <TableCell>{(file.size / 1024).toFixed(2)} KB</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
