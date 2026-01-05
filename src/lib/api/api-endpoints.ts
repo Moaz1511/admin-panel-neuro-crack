@@ -77,5 +77,9 @@ export const ApiEndpoints = {
     signedUrlUpload: `${baseUrl}/api/media-manager/signed-url/upload`,
     signedUrlReplace: `${baseUrl}/api/media-manager/signed-url/replace`,
     exportCsv: `${baseUrl}/api/media-manager/export-csv`,
+  },
+  banners: {
+    base: `${baseUrl}/api/banners`,
+    upload: `${baseUrl}/api/upload`, // Generic upload
   }
 } 
