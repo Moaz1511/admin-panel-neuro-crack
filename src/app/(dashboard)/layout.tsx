@@ -43,6 +43,7 @@ import {
     { name: 'Upload Quiz', icon: Upload, href: '/upload-quiz', roles: ['admin'] },
     { name: 'Media Manager', icon: ImageIcon, href: '/media-manager', roles: ['admin'] },
     { name: 'Banner Upload', icon: ImageIcon, href: '/banner', roles: ['admin'] },
+    { name: 'Notifications', icon: Bell, href: '/notifications', roles: ['admin'] },
     { name: 'QAC', icon: Brain, href: '/qac', roles: ['admin', 'QAC'] },
     { name: 'Users Profile', icon: UserCircle, href: '/users-profiles' },
     { name: 'Settings', icon: Settings, href: '/settings' },

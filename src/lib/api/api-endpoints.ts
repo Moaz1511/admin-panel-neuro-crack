@@ -81,5 +81,9 @@ export const ApiEndpoints = {
   banners: {
     base: `${baseUrl}/api/banners`,
     upload: `${baseUrl}/api/upload`, // Generic upload
+  },
+  notifications: {
+    base: `${baseUrl}/api/notifications`,
+    update: `${baseUrl}/api/notifications/`, // + id
   }
 } 
