@@ -4,61 +4,57 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from '@/components/ui/input'; // 💡 Import Input for search
-import { Skeleton } from '@/components/ui/skeleton'; // 💡 Import Skeleton for loading
-import { getRequest } from '@/lib/api/api-caller';
-import { Card } from '@/components/ui/card';
-import QuillViewer from '@/components/shared/QuillViewer';
-import { Question } from './types'; // 💡 Import shared types
+import { Skeleton } from '@/components/ui/skeleton';
+import { postRequest } from '@/lib/api/api-caller';
 import { baseUrl } from '@/lib/api/api-endpoints';
+import { Question } from './types';
+import QuillViewer from '@/components/shared/QuillViewer';
+
+// ...
 
 interface AddQuestionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (questions: Question[]) => void;
-  topicId: string;
-  existingQuestions: Question[]; // 💡 Prop to check for duplicates
+  topicIds: string[]; // Changed from topicId: string
+  existingQuestions: Question[];
 }
 
-type AvailableQuestions = {
-  mcq: Question[];
-  cq: Question[];
-  saq: Question[];
-}
+// ...
 
-export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQuestions }: AddQuestionModalProps) {
-  const [availableQuestions, setAvailableQuestions] = useState<AvailableQuestions>({ mcq: [], cq: [], saq: [] });
-  // 💡 Use a single object for selections. Much cleaner.
+export function AddQuestionModal({ isOpen, onClose, onAdd, topicIds, existingQuestions }: AddQuestionModalProps) {
+  const [isLoading, setLoading] = useState(false);
+  const [availableQuestions, setAvailableQuestions] = useState<{ mcq: Question[], cq: Question[], saq: Question[] }>({ mcq: [], cq: [], saq: [] });
   const [selectedToAdd, setSelectedToAdd] = useState<Record<string, Question>>({});
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const existingQuestionIds = useMemo(() => 
-    new Set(existingQuestions.map(q => `${q.type}-${q.id}`))
-  , [existingQuestions]);
+  const existingQuestionIds = useMemo(() => new Set(existingQuestions.map(q => `${q.type}-${q.id}`)), [existingQuestions]);
 
   useEffect(() => {
     const fetchQuestions = async () => {
-      if (topicId) {
+      if (topicIds && topicIds.length > 0) {
         setLoading(true);
         try {
-          const [mcqsRes, cqsRes, saqsRes]: [any, any, any] = await Promise.all([
-            getRequest(`/api/questions/topic/${topicId}`),
-            getRequest(`/api/cqs/topic/${topicId}`),
-            getRequest(`/api/saqs/topic/${topicId}`),
-          ]);
+          // Use the real backend endpoint now
+          const response = await postRequest<{ data: { mcq: Question[], cq: Question[], saq: Question[] } }, { topicIds: string[] }>(
+            `${baseUrl}/questions/by-topics`, // Correct, fully-qualified URL
+            { topicIds },
+          );
+          
           setAvailableQuestions({
-            mcq: mcqsRes.map((q: any) => ({ ...q, type: 'mcq' })),
-            cq: cqsRes.map((q: any) => ({ ...q, type: 'cq' })),
-            saq: saqsRes.map((q: any) => ({ ...q, type: 'saq' })),
+            mcq: response.data.mcq,
+            cq: response.data.cq,
+            saq: response.data.saq,
           });
+
         } catch (error) {
           console.error('Error fetching questions:', error);
-          // 💡 Consider adding a toast here
         } finally {
           setLoading(false);
         }
@@ -67,7 +63,7 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQues
     if (isOpen) {
       fetchQuestions();
     }
-  }, [topicId, isOpen]);
+  }, [topicIds, isOpen]);
 
   // 💡 Memoize filtered questions for performance
   const filteredMcqs = useMemo(() =>
@@ -208,7 +204,7 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQues
                 />
                 <label htmlFor="select-all-mcq">Select All (Filtered)</label>
               </div>
-              {loading ? renderLoadingSkeletons() : renderQuestionList(filteredMcqs)}
+              {isLoading ? renderLoadingSkeletons() : renderQuestionList(filteredMcqs)}
             </TabsContent>
             <TabsContent value="cq">
               <div className="flex items-center space-x-2 mb-4">
@@ -218,7 +214,7 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQues
                 />
                 <label htmlFor="select-all-cq">Select All (Filtered)</label>
               </div>
-              {loading ? renderLoadingSkeletons() : renderQuestionList(filteredCqs)}
+              {isLoading ? renderLoadingSkeletons() : renderQuestionList(filteredCqs)}
             </TabsContent>
             <TabsContent value="saq">
                <div className="flex items-center space-x-2 mb-4">
@@ -228,7 +224,7 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicId, existingQues
                 />
                 <label htmlFor="select-all-saq">Select All (Filtered)</label>
               </div>
-              {loading ? renderLoadingSkeletons() : renderQuestionList(filteredSaqs)}
+              {isLoading ? renderLoadingSkeletons() : renderQuestionList(filteredSaqs)}
             </TabsContent>
           </Tabs>
         </div>

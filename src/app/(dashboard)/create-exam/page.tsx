@@ -24,11 +24,11 @@ import withAdminAuth from '@/components/shared/withAdminAuth';
 function CreateExamPage() {
   const [step, setStep] = useState(1);
   const [examId, setExamId] = useState<string | null>(null);
-  const [topicId, setTopicId] = useState<string | null>(null);
+  const [topicIds, setTopicIds] = useState<string[]>([]); // Changed to array
 
-  const handleNext = (id: string, topicId: string) => {
+  const handleNext = (id: string, newTopicIds: string[]) => { // Changed parameter name
     setExamId(id);
-    setTopicId(topicId);
+    setTopicIds(newTopicIds); // Set array
     setStep(2);
   };
 
@@ -37,7 +37,7 @@ function CreateExamPage() {
       <h1 className="text-2xl font-bold mb-4">Create Exam</h1>
       <div className="flex flex-col gap-8">
         {step === 1 && <ExamSettingsForm onNext={handleNext} />}
-        {step === 2 && examId && topicId && <ExamQuestionManager examId={examId} topicId={topicId} />}
+        {step === 2 && examId && topicIds.length > 0 && <ExamQuestionManager examId={examId} topicIds={topicIds} />}
       </div>
     </main>
   );

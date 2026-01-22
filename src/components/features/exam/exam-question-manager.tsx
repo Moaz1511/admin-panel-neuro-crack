@@ -17,10 +17,10 @@ import { baseUrl } from '@/lib/api/api-endpoints';
 
 interface ExamQuestionManagerProps {
   examId: string;
-  topicId: string;
+  topicIds: string[]; // Changed to array
 }
 
-export function ExamQuestionManager({ examId, topicId }: ExamQuestionManagerProps) {
+export function ExamQuestionManager({ examId, topicIds }: ExamQuestionManagerProps) {
   const [selectedQuestions, setSelectedQuestions] = useState<Question[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,8 +132,8 @@ export function ExamQuestionManager({ examId, topicId }: ExamQuestionManagerProp
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onAdd={handleAddQuestions}
-        topicId={topicId}
-        existingQuestions={selectedQuestions} // 💡 Pass existing questions to prevent duplicates
+        topicIds={topicIds} // Pass topicIds as an array
+        existingQuestions={selectedQuestions}
       />
 
       <div className="flex justify-end mt-8">
