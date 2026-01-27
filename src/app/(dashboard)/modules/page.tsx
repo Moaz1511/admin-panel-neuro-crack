@@ -147,6 +147,12 @@ function CrudColumn({ title, items, selectedItem, onSelect, onCrudOperation, par
     const [editingName, setEditingName] = useState('');
     const [dialogState, setDialogState] = useState({ isOpen: false, title: '', description: '', onConfirm: () => {} });
 
+    useEffect(() => {
+        if (selectedItem && items.length > 0 && !items.find(item => item.id === selectedItem)) {
+            onSelect(null);
+        }
+    }, [items, selectedItem, onSelect]);
+
     const openDialog = (title: string, description: string, onConfirm: () => void) => {
         setDialogState({ isOpen: true, title, description, onConfirm });
     };
