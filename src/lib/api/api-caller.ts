@@ -118,7 +118,7 @@ axiosInstance.interceptors.response.use(
       try {
         // Call refresh token endpoint
         const response = await axiosInstance.post('/auth/refresh-token')
-        const newAccessToken = response.data.accessToken
+        const newAccessToken = response.data.data.accessToken
 
         useAuthStore.getState().setToken(newAccessToken);
         

@@ -43,14 +43,15 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicIds, existingQue
         try {
           // Use the real backend endpoint now
           const response = await postRequest<{ data: { mcq: Question[], cq: Question[], saq: Question[] } }, { topicIds: string[] }>(
-            `${baseUrl}/questions/by-topics`, // Correct, fully-qualified URL
+            `${baseUrl}/api/questions/by-topics`, // Correct, fully-qualified URL
             { topicIds },
           );
           
+          const data = response.data || { mcq: [], cq: [], saq: [] };
           setAvailableQuestions({
-            mcq: response.data.mcq,
-            cq: response.data.cq,
-            saq: response.data.saq,
+            mcq: Array.isArray(data.mcq) ? data.mcq : [],
+            cq: Array.isArray(data.cq) ? data.cq : [],
+            saq: Array.isArray(data.saq) ? data.saq : [],
           });
 
         } catch (error) {
@@ -67,19 +68,19 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicIds, existingQue
 
   // 💡 Memoize filtered questions for performance
   const filteredMcqs = useMemo(() =>
-    availableQuestions.mcq.filter(q => {
+    (availableQuestions.mcq || []).filter(q => {
       if (q.type !== 'mcq') return false;
       return q.question_text?.toLowerCase().includes(searchTerm.toLowerCase());
     }), [availableQuestions.mcq, searchTerm]);
 
   const filteredCqs = useMemo(() =>
-    availableQuestions.cq.filter(q => {
+    (availableQuestions.cq || []).filter(q => {
       if (q.type !== 'cq') return false;
       return q.uddipok?.toLowerCase().includes(searchTerm.toLowerCase());
     }), [availableQuestions.cq, searchTerm]);
   
   const filteredSaqs = useMemo(() =>
-    availableQuestions.saq.filter(q => {
+    (availableQuestions.saq || []).filter(q => {
       if (q.type !== 'saq') return false;
       return q.question_text?.toLowerCase().includes(searchTerm.toLowerCase());
     }), [availableQuestions.saq, searchTerm]);
@@ -160,7 +161,9 @@ export function AddQuestionModal({ isOpen, onClose, onAdd, topicIds, existingQue
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <div className="p-4 space-y-2 text-sm text-muted-foreground">
-                    <p><strong>Difficulty:</strong> {q.difficulty_level || q.difficulty}</p>
+                    {(q.difficulty_level || q.difficulty) && (
+                      <p><strong>Difficulty:</strong> {q.difficulty_level || q.difficulty}</p>
+                    )}
                     <p><strong>Reference:</strong></p>
                     <QuillViewer content={q.reference} />
                   </div>

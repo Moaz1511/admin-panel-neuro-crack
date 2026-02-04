@@ -37,7 +37,7 @@ import {
   const navigationItems = [
     { name: 'Dashboard', icon: Home, href: '/dashboard' },
     { name: 'Modules Management', icon: BookOpen, href: '/modules', roles: ['admin'] },
-    { name: 'Create Exam', icon: FileQuestion, href: '/exam/create', roles: ['admin'] },
+    { name: 'Create Exam', icon: FileQuestion, href: '/create-exam', roles: ['admin'] },
     { name: 'Create MCQ', icon: FileQuestion, href: '/create-quiz', roles: ['admin'] },
     { name: 'Create CQ', icon: FileQuestion, href: '/create-cq', roles: ['admin'] },
     { name: 'Create SAQ', icon: FileQuestion, href: '/create-saq', roles: ['admin'] },

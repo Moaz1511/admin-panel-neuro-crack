@@ -110,9 +110,9 @@ const qacSchema = z.object({
   subjectId: z.string().optional(),
   chapterId: z.string().optional(),
   topicId: z.string().optional(),
-  contentType: z.enum(['MCQ', 'CQ', 'SAQ', 'ALL']).optional(),
+  contentType: z.enum(['MCQ', 'CQ', 'SAQ', 'ALL']),
   searchText: z.string().optional(),
-  questionsPerPage: z.string().optional(),
+  questionsPerPage: z.string(),
 });
 
 type QACFormValues = z.infer<typeof qacSchema>;

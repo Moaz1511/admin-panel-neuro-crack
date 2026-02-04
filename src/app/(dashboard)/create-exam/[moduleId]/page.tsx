@@ -1,61 +1,84 @@
 // src/app/(dashboard)/create-exam/[moduleId]/page.tsx
-
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { QuizSettingsForm } from '@/components/features/quiz/quiz-settings-form'
-import { QuestionManager } from '@/components/features/quiz/question-manager'
-import { Separator } from '@/components/ui/separator'
-import { useSearchParams, useParams } from 'next/navigation'
-import { getRequest } from '@/lib/api/api-caller';
-import { ApiEndpoints } from '@/lib/api/api-endpoints';
-
+import { useParams } from 'next/navigation'
+import { ExamQuestionManager } from '@/components/features/exam/exam-question-manager';
 import withAdminAuth from '@/components/shared/withAdminAuth';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { getRequest } from '@/lib/api/api-caller'; // Assuming you have a getRequest function
+import { baseUrl } from '@/lib/api/api-endpoints';
 
-// 2. Use the new interface
-function CreateExamPage() {
+interface ExamDetails {
+  topicIds: string[];
+  // Add other exam properties if needed
+}
+
+function ManageExamQuestionsPage() {
   const params = useParams();
-  const moduleId = params.moduleId as string;
-  const searchParams = useSearchParams()
-  const chapterId = searchParams.get('chapterId')
-  const [quiz, setQuiz] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [quizType, setQuizType] = useState('mcq');
-  const [loading, setLoading] = useState(true);
+  const examId = params.moduleId as string;
+  const [topicIds, setTopicIds] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (moduleId !== 'new') {
-        const fetchQuiz = async () => {
-            try {
-                const response: any = await getRequest(`${ApiEndpoints.quizzes.getById}${moduleId}`);
-                setQuiz(response.data);
-                setQuestions(response.data.questions || []);
-                setQuizType(response.data.quiz_type || 'mcq');
-            } catch (error) {
-                console.error('Error fetching quiz:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchQuiz();
-    } else {
-        setLoading(false);
-    }
-  }, [moduleId]);
+    if (examId) {
+      const fetchExamDetails = async () => {
+        setIsLoading(true);
+        try {
+          const response = await getRequest<{ data: ExamDetails }>(`${baseUrl}/api/exams/${examId}`);
+          if (response.data && response.data.topicIds) {
+            setTopicIds(response.data.topicIds);
+          } else {
+            setError('Exam data is missing topic IDs.');
+          }
+        } catch (err) {
+          console.error("Failed to fetch exam details:", err);
+          setError('Failed to load exam details. Please try again.');
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-  if (loading) {
-    return <div>Loading...</div>;
+      fetchExamDetails();
+    }
+  }, [examId]);
+
+  if (!examId) {
+    return (
+        <Card>
+            <CardHeader><CardTitle>Error</CardTitle></CardHeader>
+            <CardContent><p>Exam ID is missing. Please go back and select an exam.</p></CardContent>
+        </Card>
+    );
   }
 
+  if (isLoading) {
+    return (
+        <Card>
+            <CardHeader><CardTitle>Loading...</CardTitle></CardHeader>
+            <CardContent><p>Loading exam details...</p></CardContent>
+        </Card>
+    );
+  }
+
+  if (error) {
+    return (
+        <Card>
+            <CardHeader><CardTitle>Error</CardTitle></CardHeader>
+            <CardContent><p>{error}</p></CardContent>
+        </Card>
+    );
+  }
+  
   return (
-    <div className="container mx-auto py-8">
+    <main className="flex-1 overflow-y-auto bg-gray-50 transition-all duration-300 ease-in-out p-4 md:p-8 mt-0">
+      <h1 className="text-2xl font-bold mb-4">Manage Exam Questions</h1>
       <div className="flex flex-col gap-8">
-        <QuizSettingsForm moduleId={moduleId} chapterId={chapterId} initialQuizData={quiz} quizType={quizType} setQuizType={setQuizType} />
-        <Separator />
-        {moduleId !== 'new' && <QuestionManager moduleId={moduleId} />}
+        <ExamQuestionManager examId={examId} topicIds={topicIds} />
       </div>
-    </div>
+    </main>
   )
 }
 
-export default withAdminAuth(CreateExamPage);
+export default withAdminAuth(ManageExamQuestionsPage);
