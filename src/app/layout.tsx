@@ -21,7 +21,7 @@ const hindSiliguri = Hind_Siliguri({
 });
 
 export const metadata: Metadata = {
-  title: "Next Frontend",
+  title: "NeuroCrack Admin Frontend",
   description: "This is a Next.js frontend for a web application developed by Moaz",
   keywords: ["next.js", "react", "web development"],
 };
